@@ -81,10 +81,81 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
 .creditos a { color: var(--texto-suave); }
 .aviso {
   position: fixed; z-index: 3; left: 50%; transform: translateX(-50%);
-  top: calc(64px + env(safe-area-inset-top, 0px)); width: min(560px, calc(100vw - 32px));
-  margin: 0; padding: 10px 14px; font-size: 13px; line-height: 1.45; color: var(--texto); border-color: var(--ouro);
+  top: calc(100px + env(safe-area-inset-top, 0px)); width: min(560px, calc(100vw - 32px));
+  margin: 0; padding: 10px 14px; font-size: 13px; line-height: 1.45; color: var(--texto); border-color: var(--ouro); cursor: pointer;
 }
 @media (max-width: 640px) { .ajuda, .creditos { display: none; } }
+
+/* ---------- o jogo: recursos, vida, missão, falas, menus, mapinha ---------- */
+.recursos { display: grid; grid-template-columns: repeat(2, auto); gap: 3px 14px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.recursos span { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.recursos b { color: var(--texto); min-width: 2ch; }
+.ic { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.ic.madeira { background: #9a6a3a; } .ic.pedra { background: #9aa0a6; } .ic.ouro { background: var(--ouro); border-radius: 50%; } .ic.cristal { background: #ff8a3d; transform: rotate(45deg); box-shadow: 0 0 6px #ff8a3d; }
+.vida { height: 7px; border-radius: 4px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+.vida span { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #b8322a, #e0583d); transition: width 0.15s; }
+.dia { margin: 0; font-size: 12px; color: var(--texto-suave); }
+.objetivo {
+  position: fixed; z-index: 2; left: 50%; transform: translateX(-50%);
+  top: calc(14px + env(safe-area-inset-top, 0px)); width: min(440px, calc(100vw - 32px));
+  margin: 0; padding: 8px 14px; text-align: center; display: grid; gap: 2px;
+}
+.objetivo small { font: 600 11px/1.2 var(--fonte-titulo); letter-spacing: 0.08em; color: var(--ouro); text-transform: uppercase; }
+.objetivo p { margin: 0; font-size: 14px; line-height: 1.35; }
+.fala {
+  position: fixed; z-index: 3; left: 50%; transform: translateX(-50%);
+  bottom: calc(18px + env(safe-area-inset-bottom, 0px)); width: min(600px, calc(100vw - 32px));
+  margin: 0; padding: 10px 16px; display: grid; gap: 3px; cursor: pointer;
+}
+.fala b { font: 700 13px/1.2 var(--fonte-titulo); color: var(--ouro); letter-spacing: 0.04em; }
+.fala p { margin: 0; font-size: 15px; line-height: 1.45; }
+.dica {
+  position: fixed; z-index: 2; left: 50%; transform: translateX(-50%);
+  bottom: calc(110px + env(safe-area-inset-bottom, 0px)); margin: 0; padding: 6px 12px; font-size: 13px; white-space: nowrap;
+}
+.dica kbd { margin-right: 4px; }
+.alerta {
+  position: fixed; z-index: 3; left: 50%; top: 30%; transform: translate(-50%, -50%);
+  margin: 0; font: 700 clamp(18px, 3vw, 30px)/1.2 var(--fonte-titulo); color: #ffd9a0; text-align: center;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9); pointer-events: none; transition: opacity 0.6s; width: min(760px, calc(100vw - 32px));
+}
+.menu {
+  position: fixed; z-index: 4; right: max(16px, env(safe-area-inset-right, 0px)); top: 50%; transform: translateY(-50%);
+  width: min(320px, calc(100vw - 32px)); padding: 12px 14px; display: grid; gap: 8px;
+}
+.menu h2 { margin: 0; font: 700 15px/1.2 var(--fonte-titulo); color: var(--ouro); }
+.menu button {
+  display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; align-items: center; text-align: left; width: 100%;
+  padding: 7px 9px; border: 1px solid var(--painel-borda); border-radius: 5px; background: rgba(255, 255, 255, 0.04);
+  color: var(--texto); font: 400 13px/1.3 var(--fonte-texto); cursor: pointer;
+}
+.menu button:hover:not(:disabled) { border-color: var(--ouro); }
+.menu button:disabled { opacity: 0.45; cursor: default; }
+.menu button kbd { grid-row: span 2; }
+.menu button small { color: var(--texto-suave); grid-column: 2; }
+.menu-pe { margin: 0; font-size: 12px; color: var(--texto-suave); }
+.mapinha {
+  position: fixed; z-index: 2; right: max(16px, env(safe-area-inset-right, 0px));
+  top: calc(56px + env(safe-area-inset-top, 0px)); width: 170px; height: 170px; padding: 0;
+}
+.cartao { position: fixed; inset: 0; z-index: 6; display: grid; place-items: center; padding: 16px; background: rgba(12, 10, 8, 0.55); }
+.cartao > div { width: min(560px, 100%); max-height: calc(100vh - 32px); overflow: auto; padding: 22px 24px; display: grid; gap: 14px; }
+.cartao h1 { margin: 0; font: 700 26px/1.1 var(--fonte-titulo); color: var(--ouro); letter-spacing: 0.06em; }
+.cartao p { margin: 0; font-size: 15px; line-height: 1.55; }
+.cartao .botoes { display: flex; gap: 10px; flex-wrap: wrap; }
+.cartao button {
+  padding: 9px 16px; border-radius: 5px; border: 1px solid var(--ouro); background: transparent; color: var(--texto);
+  font: 600 14px/1 var(--fonte-texto); cursor: pointer;
+}
+.cartao button.principal { background: var(--ouro); color: var(--tinta); }
+.cartao button:disabled { opacity: 0.5; cursor: default; }
+.cartao .teclas { font-size: 13px; color: var(--texto-suave); line-height: 1.6; }
+.flut { position: fixed; z-index: 2; left: 0; top: 0; pointer-events: none; font: 700 14px/1 var(--fonte-texto); text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9); white-space: nowrap; }
+.barrinha { position: fixed; z-index: 2; left: 0; top: 0; width: 46px; height: 5px; border-radius: 3px; background: rgba(0, 0, 0, 0.55); overflow: hidden; pointer-events: none; }
+.barrinha span { display: block; height: 100%; background: #e0583d; }
+.dano { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0; background: radial-gradient(ellipse at center, transparent 55%, rgba(170, 20, 10, 0.55)); transition: opacity 0.25s; }
+.ajuda.fechada dl { display: none; }
+@media (max-width: 640px) { .mapinha, .dica { display: none; } }
 </style>
 </head>
 <body>
@@ -98,21 +169,41 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
     <button class="mapa seta" type="button" id="mapa-prox" aria-label="Próximo mapa">▶</button>
   </div>
   <button class="mapa" type="button" id="graficos" title="Muda a qualidade dos gráficos (recarrega a página)">Gráficos: automático</button>
+  <div class="recursos" aria-label="Recursos">
+    <span><i class="ic madeira"></i><b id="r-madeira">0</b> madeira</span>
+    <span><i class="ic pedra"></i><b id="r-pedra">0</b> pedra</span>
+    <span><i class="ic ouro"></i><b id="r-ouro">0</b> ouro</span>
+    <span><i class="ic cristal"></i><b id="r-cristais">0</b> pedra-sol</span>
+  </div>
+  <div class="vida" title="Vida de Duarte"><span id="vida-barra"></span></div>
+  <p class="dia" id="dia">Dia 1 · manhã</p>
 </section>
+<section class="painel objetivo" id="objetivo" hidden aria-live="polite"><small id="obj-cap"></small><p id="obj-texto"></p></section>
 <p class="painel info" id="info">—</p>
+<canvas class="painel mapinha" id="mapinha" width="340" height="340" aria-label="Mapa da vila"></canvas>
 <p class="painel aviso" id="aviso" hidden></p>
-<section class="painel ajuda" aria-label="Comandos">
-  <b>Comandos</b>
+<p class="alerta" id="alerta" hidden></p>
+<p class="painel dica" id="dica" hidden></p>
+<section class="painel fala" id="fala" hidden aria-live="polite"><b id="fala-quem"></b><p id="fala-texto"></p></section>
+<section class="painel menu" id="menu" hidden><h2 id="menu-titulo"></h2><div id="menu-itens" style="display:grid;gap:6px"></div><p class="menu-pe" id="menu-pe"></p></section>
+<div class="dano" id="dano"></div>
+<div id="flutuantes"></div>
+<section class="painel ajuda fechada" id="ajuda" aria-label="Comandos">
+  <b>Comandos <kbd>H</kbd></b>
   <dl>
-    <dt><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dt><dd>Andar (ou as setas)</dd>
-    <dt><kbd>Shift</kbd></dt><dd>Correr</dd>
-    <dt><kbd>Espaço</kbd></dt><dd>Golpe de espada</dd>
-    <dt>Touchpad</dt><dd>Dois dedos para os lados giram a câmera; para cima e para baixo aproximam; pinça também aproxima</dd>
-    <dt>Arrastar</dt><dd>Clique e arraste para girar e inclinar a câmera</dd>
-    <dt><kbd>Q</kbd><kbd>E</kbd><kbd>Z</kbd><kbd>X</kbd></dt><dd>Girar e aproximar pelo teclado</dd>
+    <dt><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dt><dd>Andar (ou as setas); <kbd>Shift</kbd> corre</dd>
+    <dt><kbd>Espaço</kbd></dt><dd>Golpe: luta, corta árvore, quebra pedra</dd>
+    <dt><kbd>F</kbd></dt><dd>Agir: reerguer casa, negociar, consertar, entrar no tubo de lava</dd>
+    <dt><kbd>B</kbd></dt><dd>Construir (cerca, muro, torre, animais)</dd>
+    <dt><kbd>L</kbd></dt><dd>A Luz (com pedra-sol guardada)</dd>
+    <dt>Arrastar</dt><dd>Gira a câmera e olha para cima ou para baixo (até o céu)</dd>
+    <dt><kbd>Q</kbd><kbd>E</kbd><kbd>R</kbd><kbd>V</kbd></dt><dd>Girar e inclinar a câmera; <kbd>Z</kbd><kbd>X</kbd> aproximam</dd>
+    <dt>Touchpad</dt><dd>Dois dedos giram e aproximam; com <kbd>Shift</kbd>, inclinam</dd>
+    <dt><kbd>P</kbd></dt><dd>Pausa</dd>
   </dl>
 </section>
 <p class="creditos" id="creditos"></p>
+<div class="cartao" id="cartao" hidden><div class="painel"><h1 id="cartao-titulo"></h1><div id="cartao-texto" style="display:grid;gap:10px"></div><div class="botoes" id="cartao-botoes"></div></div></div>
 
 <div class="carga" id="carga">
   <div>
@@ -167,7 +258,12 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
     b.textContent = 'Gráficos: ' + QUALIDADES[QUALIDADE];
     b.addEventListener('click', () => { gravarLocal('qualidade', ordem[(ordem.indexOf(QUALIDADE) + 1) % ordem.length]); location.reload(); });
   }
-  function mostrarAviso(texto) { const a = $('aviso'); a.textContent = texto; a.hidden = false; }
+  function mostrarAviso(texto) {
+    const a = $('aviso');
+    a.textContent = texto + ' (clique para fechar)';
+    a.hidden = false;
+    a.onclick = () => { a.hidden = true; };
+  }
   // Arquivos: no link do Claude os .glb vão como texto (base64), porque lá .glb não é servido;
   // a cópia para lá troca o sufixo abaixo por '.txt'.
   const SUFIXO_GLB = '';
@@ -177,10 +273,11 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
   // no mesmo esqueleto. passoAndar/passoCorrer: velocidade em que o pé apoiado desliza em cada animação (m/s),
   // usada para o passo acompanhar o deslocamento sem o pé escorregar.
   const HEROI = { escala: 1, andar: 1.5, correr: 5.2, passoAndar: 0.98, passoCorrer: 5.9 };
-  // TEMPORÁRIO: herói 10x mais rápido para conferir os mapas. Voltar para 1 depois.
-  const TURBO = 10;
-  const ANIM = { parado: 'Idle_Loop', guarda: 'Sword_Idle', andar: 'Walk_Loop', correr: 'Jog_Fwd_Loop', golpe: 'Sword_Attack' };
-  const GOLPE = { dura: 1.2, guarda: 4 };   // o golpe libera aos 1,2 s; depois fica 4 s em guarda
+  // Velocidade normal. Para conferir o mapa depressa, abra o jogo com ?turbo=10 no endereço (herói 10x mais rápido).
+  const TURBO = clamp(Number(new URLSearchParams(location.search).get('turbo')) || 1, 1, 20);
+  const ANIM = { parado: 'Idle_Loop', guarda: 'Sword_Idle', andar: 'Walk_Loop', correr: 'Jog_Fwd_Loop', golpe: 'Sword_Attack', ferido: 'Hit_Chest', morte: 'Death01', magia: 'Spell_Simple_Shoot', agir: 'Interact' };
+  const GOLPE = { dura: 1.2, guarda: 4, acerta: 0.45 };   // o golpe libera aos 1,2 s (acerta aos 0,45 s); depois fica 4 s em guarda
+  GOLPE.acerta_fim = GOLPE.dura - GOLPE.acerta;
 
   const canvas = $('cena');
   let renderer;
@@ -195,6 +292,9 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
   renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.shadowMap.enabled = !LEVE;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // a exposição escurece a cena à noite (com 1, a imagem fica igual a sem ajuste)
+  renderer.toneMapping = THREE.LinearToneMapping;
+  renderer.toneMappingExposure = 1;
   // Se o Chrome estiver sem aceleração gráfica, o 3D é desenhado pelo processador e tudo fica muito lento: avisa.
   {
     const gl = renderer.getContext(), ext = gl.getExtension('WEBGL_debug_renderer_info');
@@ -220,14 +320,15 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
   sol.shadow.bias = -0.0008;
   sol.shadow.normalBias = 0.4;
   scene.add(sol, sol.target);
-  scene.add(new THREE.HemisphereLight(0xcfe0f2, MAPA === 'vila' ? 0x5d6b45 : 0x6b5b45, 0.6));
+  const luzCeu = new THREE.HemisphereLight(0xcfe0f2, MAPA === 'vila' ? 0x5d6b45 : 0x6b5b45, 0.6);
+  scene.add(luzCeu);
 
-  // céu em gradiente, com o sol
+  // céu em gradiente, com o sol (de noite o disco vira a lua, mais fraca e fria)
   const ceu = new THREE.Mesh(new THREE.SphereGeometry(5000, 32, 16), new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false,
-    uniforms: { corTopo: { value: new THREE.Color(0x3d7bbf) }, corHorizonte: { value: COR_HORIZONTE.clone() }, corBaixo: { value: new THREE.Color(0xb9c6d2) }, solDir: { value: SOL_DIR.clone() } },
+    uniforms: { corTopo: { value: new THREE.Color(0x3d7bbf) }, corHorizonte: { value: COR_HORIZONTE.clone() }, corBaixo: { value: new THREE.Color(0xb9c6d2) }, solDir: { value: SOL_DIR.clone() }, corSol: { value: new THREE.Color(1.0, 0.93, 0.78) } },
     vertexShader: 'varying vec3 vDir; void main(){ vDir = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
-    fragmentShader: 'uniform vec3 corTopo, corHorizonte, corBaixo, solDir; varying vec3 vDir; void main(){ vec3 d = normalize(vDir); vec3 c = d.y > 0.0 ? mix(corHorizonte, corTopo, pow(d.y, 0.6)) : mix(corHorizonte, corBaixo, min(1.0, -d.y * 4.0)); float s = max(dot(d, normalize(solDir)), 0.0); c += vec3(1.0, 0.93, 0.78) * (pow(s, 800.0) * 1.3 + pow(s, 12.0) * 0.14); gl_FragColor = vec4(c, 1.0); }',
+    fragmentShader: 'uniform vec3 corTopo, corHorizonte, corBaixo, solDir, corSol; varying vec3 vDir; void main(){ vec3 d = normalize(vDir); vec3 c = d.y > 0.0 ? mix(corHorizonte, corTopo, pow(d.y, 0.6)) : mix(corHorizonte, corBaixo, min(1.0, -d.y * 4.0)); float s = max(dot(d, normalize(solDir)), 0.0); c += corSol * (pow(s, 800.0) * 1.3 + pow(s, 12.0) * 0.14); gl_FragColor = vec4(c, 1.0); }',
   }));
   ceu.renderOrder = -1;
   ceu.frustumCulled = false;
@@ -267,7 +368,15 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
   let LIMITES = { xmin: -1000, xmax: 1000, zmin: -1000, zmax: 1000 };   // até onde o herói anda
   let ZOOM_MAX = 90;
   const obstaculos = [];
-  function obstaculo(x, z, hx, hz, rot) { obstaculos.push({ x, z, hx, hz, c: Math.cos(rot || 0), s: Math.sin(rot || 0) }); }
+  function obstaculo(x, z, hx, hz, rot) { const o = { x, z, hx, hz, c: Math.cos(rot || 0), s: Math.sin(rot || 0) }; obstaculos.push(o); return o; }
+  // tira um obstáculo (árvore cortada, muro derrubado): ele continua na lista, mas não segura mais ninguém
+  function tirarObstaculo(o) { if (o) { o.hx = -1000; o.hz = -1000; } }
+  // distância de um ponto até a caixa de um obstáculo (0 dentro dela)
+  function distCaixa(o, x, z) {
+    const dx = x - o.x, dz = z - o.z;
+    const lx = Math.abs(dx * o.c - dz * o.s) - o.hx, lz = Math.abs(dx * o.s + dz * o.c) - o.hz;
+    return Math.hypot(Math.max(lx, 0), Math.max(lz, 0));
+  }
   function resolverColisao(p, raio) {
     for (const o of obstaculos) {
       const dx = p.x - o.x, dz = p.z - o.z;
@@ -289,18 +398,27 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
   // e o lado de fora fica no +Z de cada peça. As repetidas viram InstancedMesh, para desenhar rápido.
   const EIXO_Y = new THREE.Vector3(0, 1, 0);
   const UM = new THREE.Vector3(1, 1, 1);
+  const PECAS = {};        // peças do kit da vila (também servem para as cercas e muros que o jogador constrói)
+  const CASAS_INFO = [];   // cada casa: as peças dela, se está em ruína ou de pé, e a vida
   const colocacoes = new Map();
+  // Cada peça de casa leva uma etiqueta (de qual casa é e se fica de pé na ruína), para a casa poder começar em ruína,
+  // ser reerguida e voltar a ser ruína se os inimigos a queimarem.
+  const etiquetas = new Map();
+  let etiquetaAtual = null;
   function colocar(nome, x, y, z, rot, pai) {
     const m = new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromAxisAngle(EIXO_Y, rot || 0), UM);
     if (pai) m.premultiply(pai);
-    if (!colocacoes.has(nome)) colocacoes.set(nome, []);
+    if (!colocacoes.has(nome)) { colocacoes.set(nome, []); etiquetas.set(nome, []); }
     colocacoes.get(nome).push(m);
+    etiquetas.get(nome).push(etiquetaAtual ? { ...etiquetaAtual } : null);
   }
   function matrizCasa(x, z, rot) { return new THREE.Matrix4().compose(new THREE.Vector3(x, 0, z), new THREE.Quaternion().setFromAxisAngle(EIXO_Y, rot), UM); }
 
   // Casa de w × d módulos (2 m cada), com a fachada de empena virada para +Z local.
-  function construirCasa(c) {
+  // Na ruína ficam só as paredes do térreo (algumas caídas), escurecidas pelo fogo; o resto aparece ao reerguer.
+  function construirCasa(c, indice) {
     const W = c.w * 2, D = c.d * 2, A = c.andares, M = matrizCasa(c.x, c.z, c.rot);
+    const etiqueta = (base) => { etiquetaAtual = { casa: indice, base }; };
     const lados = [
       { n: c.w, pos: (i) => [-W / 2 + 1 + 2 * i, D / 2], rot: 0, frente: true },
       { n: c.w, pos: (i) => [W / 2 - 1 - 2 * i, -D / 2], rot: Math.PI },
@@ -320,7 +438,10 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
           else if (k > 0 && !pedra && (i + k) % 2 === 0) tipo = 'WoodGrid';
           else tipo = (i % 2 === 0) ? 'Window_Thin_Round' : 'Straight';
           if (pedra && tipo === 'WoodGrid') tipo = 'Straight';
+          // na ruína, uma em cada três paredes do térreo (fora a da porta) está caída
+          etiqueta(k === 0 && (tipo === 'Door_Round' || (i + indice + lado.n) % 3 !== 1));
           colocar(parede + tipo, px, y, pz, lado.rot, M);
+          etiqueta(false);
           if (tipo === 'Window_Wide_Round') {
             colocar('Window_Wide_Round1', px, y, pz, lado.rot, M);
             if (k > 0 && lado.frente) colocar('WindowShutters_Wide_Round_Open', px, y, pz, lado.rot, M);
@@ -335,7 +456,9 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
           if (k > 0) colocar('Wall_BottomCover', px, y, pz, lado.rot, M);
         }
       }
+      etiqueta(k === 0);
       for (const [sx, sz] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) colocar('Corner_Exterior_Wood', sx * W / 2, y, sz * D / 2, 0, M);
+      etiqueta(false);
     }
     const H = A * 3;
     if (c.torre) {
@@ -352,7 +475,8 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
       colocar('Prop_Support', W / 2 - 0.4, 0, D / 2 + 0.05, 0, M);
     }
     if (c.trepadeira) colocar('Prop_Vine1', -W / 2 + 1.4, A * 3 - 0.2, D / 2 + 0.12, 0, M);
-    obstaculo(c.x, c.z, W / 2 + 0.2, D / 2 + 0.2, c.rot);
+    etiquetaAtual = null;
+    c.obst = obstaculo(c.x, c.z, W / 2 + 0.2, D / 2 + 0.2, c.rot);
   }
 
   const suave = (a, b, v) => { const t = clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
@@ -589,17 +713,11 @@ if (gTeide > 0.001) {
   const JEITO_ITENS = { 'cristal-sol': { brilho: 1.6 } };
 
   // ---------- personagens e bichos animados (objetos/personagens) ----------
-  // Cada um tem o seu AnimationMixer. O diabrete e o porco-goblin usam o mesmo esqueleto do herói e tocam as animações
-  // dele (doHeroi). Quem tem "voo" dá voltas no ar em torno de um ponto.
+  // Bichos da vila, cada um com o seu AnimationMixer. Quem tem "voo" dá voltas no ar em torno de um ponto. Os vilões
+  // (orc, diabretes, porcos-goblin, Cinzentos e o Guardião) são do jogo: ver criarInimigo.
   const SUL = { x: 0, z: -600 };   // os vilões ficam virados para o vale
   const ANIMADOS = [
     { arq: 'gato', x: -6, z: 15, rot: 2.4, clipe: 'parado', caixa: [0.15, 0.25] },
-    { arq: 'orc', x: 82, z: -1440, rot: voltadoPara(82, -1440, SUL.x, SUL.z), clipe: 'parado1', caixa: [0.5, 0.5] },
-    { arq: 'diabrete', x: 50, z: -1440, rot: voltadoPara(50, -1440, SUL.x, SUL.z), clipe: 'Idle_Loop', doHeroi: true, caixa: [0.4, 0.4] },
-    { arq: 'diabrete', x: 76, z: -1470, rot: 2.2, clipe: 'Sword_Idle', doHeroi: true, caixa: [0.4, 0.4] },
-    { arq: 'puglin', x: 58, z: -1478, rot: 0.9, clipe: 'Idle_Loop', doHeroi: true, caixa: [0.4, 0.4] },
-    { arq: 'puglin', x: 90, z: -1452, rot: 4.0, clipe: 'Idle_Loop', doHeroi: true, caixa: [0.4, 0.4] },
-    { arq: 'guardiao', x: 40, z: -1478, rot: voltadoPara(40, -1478, SUL.x, SUL.z), caixa: [1.4, 1.2] },
     // pardais dando voltas sobre a vila (altura em metros acima do nível do vale)
     { arq: 'passaro', x: 0, z: 0, clipe: 'voar', voo: { cx: 0, cz: 0, raio: 35, altura: 16, vel: 0.32 } },
     { arq: 'passaro', x: 0, z: 0, clipe: 'planar', voo: { cx: 15, cz: -10, raio: 55, altura: 22, vel: -0.2 } },
@@ -685,6 +803,7 @@ if (gTeide > 0.001) {
             o.material.emissiveIntensity = jeito.brilho;
           }
         });
+        MODELOS_ITENS[arq] = gltf;   // o jogo usa de molde (torre de arqueiro, animais comprados, cristais)
         for (const it of lista) {
           const m = gltf.scene.clone();
           const e = it.escala || 1;
@@ -692,15 +811,24 @@ if (gTeide > 0.001) {
           m.rotation.y = it.rot;
           m.scale.setScalar(e);
           scene.add(m);
-          if (it.caixa[0] > 0) obstaculo(it.x, it.z, it.caixa[0] * e, it.caixa[1] * e, it.rot);
+          it.modelo = m;
+          if (it.caixa[0] > 0) it.obst = obstaculo(it.x, it.z, it.caixa[0] * e, it.caixa[1] * e, it.rot);
         }
       }));
     }
-    tarefas.push(carregarNatureza(), carregarAnimados());
+    tarefas.push(carregarNatureza(), carregarAnimados(), carregarModelosInimigos());
     const fim = await Promise.allSettled(tarefas);
     for (const r of fim) if (r.status === 'rejected') console.warn('não carregou um objeto da vila:', r.reason);
     $('creditos').innerHTML += ' ' + [...creditosExtras].join('. ') + '.';
     extrasProntos = true;
+  }
+  // moldes para o jogo: itens (torre de arqueiro, animais, cristais) e os inimigos
+  const MODELOS_ITENS = {};
+  const MODELOS_INIMIGOS = {};
+  async function carregarModelosInimigos() {
+    await Promise.allSettled(['orc', 'diabrete', 'puglin', 'guardiao'].map(async (arq) => {
+      MODELOS_INIMIGOS[arq] = await carregarGLB('objetos/personagens/' + arq + '.glb' + SUFIXO_GLB);
+    }));
   }
   const creditosExtras = new Set();
   let extrasProntos = false;
@@ -793,8 +921,8 @@ if (gTeide > 0.001) {
       o.y = alturaMundo(o.x, o.z) - afunda;
       o.indice = grupos.get(chave).length;   // posição da cópia na InstancedMesh do bloco (para cortar ou quebrar depois)
       grupos.get(chave).push(o);
-      if (o.tipo === 'arvore') obstaculo(o.x, o.z, 0.45 * o.esc, 0.45 * o.esc, o.rot);
-      if (o.tipo === 'pedra') obstaculo(o.x, o.z, 1.25 * o.esc, 1.1 * o.esc, o.rot);
+      if (o.tipo === 'arvore') o.obst = obstaculo(o.x, o.z, 0.45 * o.esc, 0.45 * o.esc, o.rot);
+      if (o.tipo === 'pedra') o.obst = obstaculo(o.x, o.z, 1.25 * o.esc, 1.1 * o.esc, o.rot);
       RECURSOS.push(o);
     }
     const m = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), e = new THREE.Vector3();
@@ -802,7 +930,7 @@ if (gTeide > 0.001) {
       const nome = chave.split('|')[0], peca = pecas[nome];
       if (!peca) { console.warn('peça da natureza não encontrada:', nome); continue; }
       const inv = new THREE.Matrix4().copy(peca.matrixWorld).invert();
-      const temCor = copias.some((k) => k.vulcao);
+      const temCor = true;   // cor por cópia em todos os blocos (ver a nota das peças da vila)
       const malhas = [];
       peca.traverse((o) => {
         if (!o.isMesh) return;
@@ -821,6 +949,7 @@ if (gTeide > 0.001) {
         for (const c of copias) raio = Math.max(raio, v.set(c.x, c.y, c.z).distanceTo(centro) + r0 * c.esc);
         geo.boundingSphere = new THREE.Sphere(centro, raio);
         const im = new THREE.InstancedMesh(geo, o.material, copias.length);
+        im.userData.rel = rel;   // para mexer numa cópia depois (árvore caindo, pedra quebrando)
         copias.forEach((c, i) => {
           m.compose(v.set(c.x, c.y, c.z), q.setFromAxisAngle(EIXO_Y, c.rot), e.setScalar(c.esc));
           im.setMatrixAt(i, m.multiply(rel));
@@ -850,7 +979,6 @@ if (gTeide > 0.001) {
     // peças da vila
     elCargaTexto.textContent = 'Carregando a vila…';
     const gltf = await carregarGLB(ARQ.pecas, (xhr) => { if (xhr.total) elCargaBarra.style.width = (20 + 50 * xhr.loaded / xhr.total) + '%'; });
-    const PECAS = {};
     for (const o of gltf.scene.children) PECAS[o.name] = o;
     gltf.scene.updateMatrixWorld(true);
 
@@ -885,7 +1013,7 @@ if (gTeide > 0.001) {
       { x: 30, z: -30, rot: -Math.PI / 4, w: 2, d: 3, andares: 1, base: 'pedra', chamine: true },
       { x: -28, z: 30, rot: Math.PI * 3 / 4, w: 4, d: 4, andares: 2, base: 'pedra', varanda: true },
     ];
-    for (const c of CASAS) construirCasa(c);
+    CASAS.forEach((c, i) => construirCasa(c, i));
 
     // carroça, caixotes e tijolos soltos
     colocar('Prop_Wagon', 8, 0, 6, 0.35); obstaculo(8.4, 4.9, 1.0, 2.1, 0.35);
@@ -903,15 +1031,25 @@ if (gTeide > 0.001) {
     // transforma as colocações em InstancedMesh, uma por malha de cada peça
     const tmp = new THREE.Matrix4();
     let faltando = [];
+    CASAS.forEach((c) => CASAS_INFO.push({ c, pecas: [], estado: 'pronta', vida: 0, vidaMax: 60 * c.andares + 15 * c.w * c.d, anim: 0 }));
     for (const [nome, lista] of colocacoes) {
       const peca = PECAS[nome];
       if (!peca) { faltando.push(nome); continue; }
       const inv = new THREE.Matrix4().copy(peca.matrixWorld).invert();
+      const tags = etiquetas.get(nome);
+      // Todas as peças ganham cor por cópia (branco = sem mudança). No three r147 um material repartido entre uma
+      // InstancedMesh com cor e outra sem cor desenha a sem cor de preto, então ou todas têm, ou nenhuma.
+      const temCasa = true;
       peca.traverse((o) => {
         if (!o.isMesh) return;
         const rel = new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld);
         const im = new THREE.InstancedMesh(o.geometry, o.material, lista.length);
-        lista.forEach((m, i) => im.setMatrixAt(i, tmp.multiplyMatrices(m, rel)));
+        lista.forEach((m, i) => {
+          im.setMatrixAt(i, tmp.multiplyMatrices(m, rel));
+          // peças de casa: guardadas para mostrar a ruína ou a casa inteira; com cor por cópia (a ruína fica queimada)
+          if (temCasa) im.setColorAt(i, BRANCO);
+          if (tags[i]) CASAS_INFO[tags[i].casa].pecas.push({ im, i, m: tmp.clone(), base: tags[i].base });
+        });
         im.castShadow = true;
         im.receiveShadow = true;
         im.frustumCulled = false;
@@ -919,6 +1057,8 @@ if (gTeide > 0.001) {
         scene.add(im);
       });
     }
+    // todas começam em ruína (o jogo salvo pode reerguer algumas depois)
+    for (const info of CASAS_INFO) pintarCasa(info, 'ruina');
     if (faltando.length) console.warn('peças não encontradas:', faltando.join(', '));
     elCargaBarra.style.width = '75%';
     carregarExtrasVila();   // Pico, Ponte, pedras, torre, portal e árvores aparecem assim que chegam
@@ -1054,10 +1194,10 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
   }
 
   // ---------- herói animado ----------
-  const heroi = { pos: new THREE.Vector3(), ang: 0, vel: 0, grupo: new THREE.Group(), mixer: null, acoes: {}, atual: null, golpe: 0, guarda: 0 };
+  const heroi = { pos: new THREE.Vector3(), ang: 0, vel: 0, grupo: new THREE.Group(), mixer: null, acoes: {}, atual: null, golpe: 0, guarda: 0, ocupado: 0, modelo: null };
   scene.add(heroi.grupo);
   // as animações do herói também servem para os personagens que usam o mesmo esqueleto
-  let avisarAnimsHeroi;
+  let avisarAnimsHeroi, CLIPES_HEROI = [];
   const animsDoHeroi = new Promise((ok) => { avisarAnimsHeroi = ok; });
   async function carregarHeroi() {
     const parte = { heroi: 0, anims: 0 };
@@ -1070,10 +1210,14 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
     heroi.mixer = new THREE.AnimationMixer(m);
     for (const clip of anims.animations) heroi.acoes[clip.name] = heroi.mixer.clipAction(clip);
     avisarAnimsHeroi(anims.animations);
+    CLIPES_HEROI = anims.animations;
     const faltam = Object.values(ANIM).filter((n) => !heroi.acoes[n]);
     if (faltam.length) throw new Error('animações faltando: ' + faltam.join(', '));
-    const golpe = heroi.acoes[ANIM.golpe];
-    golpe.setLoop(THREE.LoopOnce, 1); golpe.clampWhenFinished = true;
+    for (const nome of [ANIM.golpe, ANIM.ferido, ANIM.morte, ANIM.magia, ANIM.agir]) {
+      const a = heroi.acoes[nome];
+      if (a) { a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true; }
+    }
+    heroi.modelo = m;
     tocar(ANIM.parado);
   }
   function tocar(nome, fade) {
@@ -1085,23 +1229,31 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
   }
 
   // ---------- câmera: segue o herói; gira e aproxima pelo touchpad, mouse e teclado ----------
+  // inc é a inclinação: positiva olha de cima para baixo; negativa olha para cima (até o céu). Quando a câmera
+  // encosta no chão, ela continua olhando na mesma direção em vez de mirar o herói.
   const cam = { yaw: 0, dist: 14, inc: 0.6 };
+  const INC = { min: -1.2, max: 1.45 };
   const alvoCam = new THREE.Vector3();
   const posCam = new THREE.Vector3();
   function atualizarCamera(dt) {
-    const h = Math.cos(cam.inc) * cam.dist;
-    const px = heroi.pos.x - Math.sin(cam.yaw) * h;
-    const pz = heroi.pos.z - Math.cos(cam.yaw) * h;
-    const py = Math.max(heroi.pos.y + 1.2 + Math.sin(cam.inc) * cam.dist, alturaEm(px, pz) + 2);   // não entra no morro
+    const ci = Math.cos(cam.inc), si = Math.sin(cam.inc);
+    const fx = Math.sin(cam.yaw) * ci, fy = -si, fz = Math.cos(cam.yaw) * ci;   // para onde a câmera olha
+    const ax = heroi.pos.x, ay = heroi.pos.y + 1.3, az = heroi.pos.z;
+    const px = ax - fx * cam.dist, pz = az - fz * cam.dist;
+    const folga = 0.5 + 1.5 * clamp(cam.inc / 0.3, 0, 1);   // olhando para cima, a câmera pode descer quase até o chão
+    const py = Math.max(ay - fy * cam.dist, alturaEm(px, pz) + folga);   // não entra no morro
     const k = 1 - Math.exp(-dt * 7 * Math.sqrt(TURBO));   // com o turbo, a câmera acompanha mais firme
     camera.position.lerp(posCam.set(px, py, pz), k);
-    alvoCam.lerp(posCam.set(heroi.pos.x, heroi.pos.y + 1.2, heroi.pos.z), k);
+    if (cam.inc >= 0) posCam.set(ax, ay, az);
+    else posCam.set(px + fx * cam.dist, py + fy * cam.dist, pz + fz * cam.dist);
+    alvoCam.lerp(posCam, k);
     camera.lookAt(alvoCam);
     sol.position.copy(heroi.pos).addScaledVector(SOL_DIR, 200);
     sol.target.position.copy(heroi.pos);
     ceu.position.copy(camera.position);
   }
-  const zoom = (f) => { cam.dist = clamp(cam.dist * f, 5, ZOOM_MAX); };
+  const zoom = (f) => { cam.dist = clamp(cam.dist * f, 3, ZOOM_MAX); };
+  const inclinar = (d) => { cam.inc = clamp(cam.inc + d, INC.min, INC.max); };
   // Touchpad: dois dedos geram eventos de rolagem. Para os lados gira, para cima/baixo aproxima,
   // e a pinça chega com ctrlKey ligado (aproxima mais rápido). Num mouse, a rodinha aproxima.
   canvas.addEventListener('wheel', (e) => {
@@ -1109,6 +1261,7 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
     const escala = e.deltaMode === 1 ? 16 : 1;
     const dx = e.deltaX * escala, dy = e.deltaY * escala;
     if (e.ctrlKey) zoom(Math.exp(dy * 0.01));
+    else if (e.shiftKey) inclinar((Math.abs(dy) >= Math.abs(dx) ? dy : dx) * 0.003);   // Shift + dois dedos: inclina (o Shift pode virar a rolagem de lado)
     else {
       cam.yaw -= dx * 0.004;
       zoom(Math.exp(dy * 0.0015));
@@ -1120,7 +1273,7 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
   canvas.addEventListener('pointermove', (e) => {
     if (!arrasto) return;
     cam.yaw -= (e.clientX - arrasto.x) * 0.006;
-    cam.inc = clamp(cam.inc + (e.clientY - arrasto.y) * 0.004, 0.12, 1.45);
+    inclinar((e.clientY - arrasto.y) * 0.004);
     arrasto.x = e.clientX; arrasto.y = e.clientY;
   });
   const soltar = () => { arrasto = null; canvas.classList.remove('arrastando'); };
@@ -1137,7 +1290,8 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
     teclas.add(e.code);
     if (document.activeElement && document.activeElement !== document.body && /^(Key|Arrow|Space|Shift)/.test(e.code)) document.activeElement.blur();
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) e.preventDefault();
-    if (e.code === 'Space' && !e.repeat && heroi.acoes[ANIM.golpe] && heroi.golpe <= 0) {
+    if (teclaDoJogo(e)) return;
+    if (e.code === 'Space' && !e.repeat && heroi.acoes[ANIM.golpe] && heroi.golpe <= 0 && podeAgir()) {
       heroi.golpe = GOLPE.dura;
       heroi.guarda = GOLPE.guarda;
       heroi.atual = null;
@@ -1149,20 +1303,29 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
   const ap = (c) => teclas.has(c);
 
   function moverHeroi(dt) {
+    if (ap('KeyQ')) cam.yaw += 1.6 * dt;
+    if (ap('KeyE')) cam.yaw -= 1.6 * dt;
+    if (ap('KeyR')) inclinar(-1.1 * dt);   // olhar para cima
+    if (ap('KeyV')) inclinar(1.1 * dt);    // olhar para baixo
+    if (ap('KeyZ')) zoom(Math.exp(-1.2 * dt));
+    if (ap('KeyX')) zoom(Math.exp(1.2 * dt));
+    // caído ou com o jogo parado: só a câmera mexe
+    if (!podeAgir()) {
+      heroi.vel = 0;
+      heroi.grupo.position.copy(heroi.pos);
+      if (heroi.mixer && !JOGO.pausado) heroi.mixer.update(dt);
+      return;
+    }
     // direção relativa à câmera: W afasta da câmera, S aproxima, A/D para os lados
     let fx = 0, fz = 0;
     if (ap('KeyW') || ap('ArrowUp')) fz += 1;
     if (ap('KeyS') || ap('ArrowDown')) fz -= 1;
     if (ap('KeyA') || ap('ArrowLeft')) fx -= 1;
     if (ap('KeyD') || ap('ArrowRight')) fx += 1;
-    if (ap('KeyQ')) cam.yaw += 1.6 * dt;
-    if (ap('KeyE')) cam.yaw -= 1.6 * dt;
-    if (ap('KeyZ')) zoom(Math.exp(-1.2 * dt));
-    if (ap('KeyX')) zoom(Math.exp(1.2 * dt));
     const quer = fx !== 0 || fz !== 0;
     const correndo = ap('ShiftLeft') || ap('ShiftRight');
     const velAlvo = quer ? (correndo ? HEROI.correr : HEROI.andar) * TURBO : 0;
-    heroi.vel = aproximar(heroi.vel, heroi.golpe > 0 ? velAlvo * 0.4 : velAlvo, 8, dt);
+    heroi.vel = aproximar(heroi.vel, heroi.golpe > 0 || heroi.ocupado > 0 ? velAlvo * 0.4 : velAlvo, 8, dt);
     if (quer) {
       const l = Math.hypot(fx, fz);
       // a câmera olha para (sin yaw, cos yaw); a direita dela na tela é (-cos yaw, sin yaw)
@@ -1195,8 +1358,14 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
     heroi.grupo.rotation.set(0, heroi.ang, 0);
     // animação conforme a velocidade; o ritmo dos passos acompanha o deslocamento
     if (heroi.guarda > 0) heroi.guarda -= dt;
-    if (heroi.golpe > 0) {
+    if (heroi.ocupado > 0) {
+      // ferido, fazendo a Luz ou mexendo em algo: a animação toca até o fim
+      heroi.ocupado -= dt;
+      if (heroi.ocupado <= 0) heroi.atual = null;
+    } else if (heroi.golpe > 0) {
+      const antes = heroi.golpe;
       heroi.golpe -= dt;
+      if (antes > GOLPE.acerta_fim && heroi.golpe <= GOLPE.acerta_fim) golpeDoHeroi();   // a lâmina chega
       if (heroi.golpe <= 0) heroi.atual = null;
     } else if (heroi.vel / TURBO > HEROI.andar * 1.4) {
       tocar(ANIM.correr);
@@ -1212,6 +1381,1450 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
     animarVivos(dt);
   }
 
+  // =====================================================================================================================
+  // O JOGO: a história "Cavaleiro do Teide" (HISTORIA.md) jogável. Recursos, casas em ruína que voltam a ficar de pé,
+  // construção, o mercador, dia e noite, ataques dos Cinzentos e dos diabos, missões por capítulo e os finais.
+  // =====================================================================================================================
+  const DIA_SEG = 360;   // um dia de jogo dura 6 minutos: dia até 0,58; entardecer; noite de 0,70 a 0,92; madrugada
+  const JOGO = {
+    pausado: true, iniciado: false, pausaTecla: false,
+    madeira: 0, pedra: 0, ouro: 15, cristais: 0, vendidos: 0, devolvidos: 0,
+    vida: 100, vidaMax: 100, morto: 0, semDano: 0, invulneravel: 0, luz: 0,
+    dia: 1, hora: 0.1, missao: 0, ataques: false, onda: 0, ondaAtiva: false, noiteFeita: 0,
+    escuro: 0, escuroAlvo: 0, guardiaoMorto: false, fim: null,
+    cont: { arvores: 0, pedras: 0, vendas: 0, torres: 0, muros: 0, noites: 0, achados: 0, mercador: 0 },
+  };
+  const cortados = new Set();   // árvores e pedras já tiradas (pela posição), para o jogo salvo
+  const pegos = new Set();      // cristais do chão já recolhidos
+  const obras = [];             // cercas, muros, torres e animais construídos pelo jogador
+  const inimigos = [];
+  let jogoPronto = false;
+  const podeAgir = () => !JOGO.pausado && JOGO.morto <= 0;
+  const NOME_REC = { madeira: 'madeira', pedra: 'pedra', ouro: 'ouro', cristais: 'pedra-sol' };
+  const COR_TEXTO = { madeira: '#e2b07a', pedra: '#d4d8dc', ouro: '#f3cf6a', cristais: '#ffa560', dano: '#ff8a7a', bom: '#9fe08a' };
+  const casasProntas = () => CASAS_INFO.filter((c) => c.estado === 'pronta').length;
+  const dist2 = (ax, az, bx, bz) => Math.hypot(ax - bx, az - bz);
+
+  // ---------- custos ----------
+  const textoCusto = (custo) => Object.entries(custo).map(([k, v]) => v + ' ' + NOME_REC[k]).join(', ');
+  const temRecursos = (custo) => Object.entries(custo).every(([k, v]) => JOGO[k] >= v);
+  function faltaTexto(custo) {
+    const f = Object.entries(custo).filter(([k, v]) => JOGO[k] < v).map(([k, v]) => (v - JOGO[k]) + ' de ' + NOME_REC[k]);
+    return 'Falta ' + f.join(' e ');
+  }
+  function pagar(custo) {
+    if (!temRecursos(custo)) return false;
+    for (const [k, v] of Object.entries(custo)) JOGO[k] -= v;
+    return true;
+  }
+
+  // ---------- textos na tela: falas, alertas, números que sobem, barras de vida ----------
+  const filaFalas = [];
+  let falaAtual = null;
+  function falar(lista) { for (const [quem, texto] of lista || []) filaFalas.push({ quem, texto }); }
+  function pularFala() { if (falaAtual) falaAtual.t = 0; }
+  $('fala').addEventListener('click', pularFala);
+  function atualizarFalas(dt) {
+    if (falaAtual) { falaAtual.t -= dt; if (falaAtual.t <= 0) falaAtual = null; }
+    if (!falaAtual && filaFalas.length) {
+      falaAtual = filaFalas.shift();
+      falaAtual.t = clamp(2 + falaAtual.texto.length * 0.055, 3.5, 9);
+      $('fala-quem').textContent = falaAtual.quem;
+      $('fala-texto').textContent = falaAtual.texto;
+    }
+    $('fala').hidden = !falaAtual;
+  }
+  let tAlerta = 0;
+  function alerta(texto, dur) {
+    const el = $('alerta');
+    el.textContent = texto;
+    el.hidden = !texto;
+    el.style.opacity = 1;
+    tAlerta = dur || 3;
+  }
+  const flutuantes = [];
+  const vTela = new THREE.Vector3();
+  function naTela(x, y, z) {
+    vTela.set(x, y, z).project(camera);
+    if (vTela.z > 1 || Math.abs(vTela.x) > 1.2 || Math.abs(vTela.y) > 1.2) return null;
+    return [(vTela.x + 1) / 2 * canvas.clientWidth, (1 - vTela.y) / 2 * canvas.clientHeight];
+  }
+  function flutuar(texto, x, y, z, cor) {
+    const el = document.createElement('div');
+    el.className = 'flut';
+    el.textContent = texto;
+    el.style.color = cor || '#fff';
+    $('flutuantes').appendChild(el);
+    flutuantes.push({ el, x, y, z, t: 0 });
+  }
+  // barras de vida (inimigos e casas atacadas): uma div por dono, criada quando precisa
+  function barraDe(dono) {
+    if (!dono.barra) {
+      dono.barra = document.createElement('div');
+      dono.barra.className = 'barrinha';
+      dono.barra.innerHTML = '<span></span>';
+      $('flutuantes').appendChild(dono.barra);
+    }
+    return dono.barra;
+  }
+  function tirarBarra(dono) { if (dono.barra) { dono.barra.remove(); dono.barra = null; } }
+  function atualizarTextos(dt) {
+    for (let i = flutuantes.length - 1; i >= 0; i--) {
+      const f = flutuantes[i];
+      f.t += dt;
+      const p = naTela(f.x, f.y, f.z);
+      if (f.t > 1.5 || !p) { f.el.remove(); flutuantes.splice(i, 1); continue; }
+      f.el.style.transform = `translate(${p[0]}px, ${p[1] - f.t * 45}px) translate(-50%, -50%)`;
+      f.el.style.opacity = Math.min(1, (1.5 - f.t) * 2);
+    }
+    const mostrar = (dono, x, y, z, frac) => {
+      const b = barraDe(dono), p = naTela(x, y, z);
+      if (!p || dist2(x, z, camera.position.x, camera.position.z) > 70) { b.style.display = 'none'; return; }
+      b.style.display = 'block';
+      b.style.transform = `translate(${p[0] - 23}px, ${p[1]}px)`;
+      b.firstChild.style.width = (clamp(frac, 0, 1) * 100) + '%';
+    };
+    for (const e of inimigos) {
+      if (e.morto || e.estado === 'estatua' || (e.vida >= e.def.vida && !e.provocado)) { tirarBarra(e); continue; }
+      mostrar(e, e.pos.x, e.pos.y + e.def.altura, e.pos.z, e.vida / e.def.vida);
+    }
+    for (const c of CASAS_INFO) {
+      if (c.estado !== 'pronta' || c.vida >= c.vidaMax) { tirarBarra(c); continue; }
+      mostrar(c, c.c.x, c.c.andares * 3 + 3.5, c.c.z, c.vida / c.vidaMax);
+    }
+    for (const o of obras) {
+      if (o.vida >= o.vidaMax) { tirarBarra(o); continue; }
+      mostrar(o, o.x, o.y + (o.def.id === 'torre' ? 8 : 3.4), o.z, o.vida / o.vidaMax);
+    }
+    if (tAlerta > 0) {
+      tAlerta -= dt;
+      if (tAlerta <= 0.6) $('alerta').style.opacity = Math.max(0, tAlerta / 0.6);
+      if (tAlerta <= 0) $('alerta').hidden = true;
+    }
+  }
+
+  // ---------- dia e noite ----------
+  const CORES = {
+    dia: { topo: new THREE.Color(0x3d7bbf), horiz: new THREE.Color(0xdbe6ee), baixo: new THREE.Color(0xb9c6d2), sol: new THREE.Color(0xffe8c8), ceu: new THREE.Color(0xcfe0f2), disco: new THREE.Color(1.0, 0.93, 0.78) },
+    tarde: { topo: new THREE.Color(0x4f6a9c), horiz: new THREE.Color(0xf2b07a), baixo: new THREE.Color(0xa08876), sol: new THREE.Color(0xffa45e), ceu: new THREE.Color(0xf0c8a8), disco: new THREE.Color(1.0, 0.7, 0.4) },
+    noite: { topo: new THREE.Color(0x050a16), horiz: new THREE.Color(0x18202f), baixo: new THREE.Color(0x0e121a), sol: new THREE.Color(0x9fb4e8), ceu: new THREE.Color(0x40507a), disco: new THREE.Color(0.55, 0.6, 0.72) },
+    cinza: { topo: new THREE.Color(0x34302e), horiz: new THREE.Color(0x6b605a), baixo: new THREE.Color(0x48423e), sol: new THREE.Color(0xc09070), ceu: new THREE.Color(0x8a7a70), disco: new THREE.Color(0.8, 0.4, 0.2) },
+  };
+  const luzDoDia = (h) => (h < 0.58 ? 1 : h < 0.7 ? 1 - suave(0.58, 0.7, h) : h < 0.92 ? 0 : suave(0.92, 1, h));
+  const tardeDoDia = (h) => Math.max(0, 1 - Math.abs(h - 0.64) / 0.07) + Math.max(0, 1 - Math.abs(h - 0.955) / 0.045);
+  const corTmp = { topo: new THREE.Color(), horiz: new THREE.Color(), baixo: new THREE.Color(), sol: new THREE.Color(), ceu: new THREE.Color(), disco: new THREE.Color() };
+  function nomeDaHora(h) { return h < 0.25 ? 'manhã' : h < 0.58 ? 'tarde' : h < 0.7 ? 'entardecer' : h < 0.92 ? 'noite' : 'madrugada'; }
+  function atualizarCeu(dt) {
+    JOGO.escuro += (JOGO.escuroAlvo - JOGO.escuro) * (1 - Math.exp(-dt * 0.5));
+    const luz = luzDoDia(JOGO.hora), tarde = Math.min(1, tardeDoDia(JOGO.hora)) * 0.75, escuro = JOGO.escuro * 0.85;
+    for (const k in corTmp) corTmp[k].copy(CORES.noite[k]).lerp(CORES.dia[k], luz).lerp(CORES.tarde[k], tarde).lerp(CORES.cinza[k], escuro);
+    const u = ceu.material.uniforms;
+    u.corTopo.value.copy(corTmp.topo); u.corHorizonte.value.copy(corTmp.horiz); u.corBaixo.value.copy(corTmp.baixo); u.corSol.value.copy(corTmp.disco);
+    scene.background.copy(corTmp.horiz);
+    scene.fog.color.copy(corTmp.horiz);
+    sol.color.copy(corTmp.sol);
+    sol.intensity = (0.5 + 1.5 * luz) * (1 - 0.45 * escuro);
+    luzCeu.color.copy(corTmp.ceu);
+    luzCeu.intensity = 0.25 + 0.35 * luz;
+    renderer.toneMappingExposure = (0.5 + 0.5 * luz) * (1 - 0.3 * escuro);
+    if (fogueiras) fogueiras.material.opacity = clamp(1.15 - luz * 1.3 + escuro * 0.5, 0, 1);
+  }
+  // As fogueiras do paredão (o relógio da história): pontos de fogo no Pico que só aparecem de noite. Cada pedra-sol
+  // tirada das rochas apaga uma; vendida, apaga duas.
+  let fogueiras = null;
+  const fogueirasAcesas = () => clamp(40 - JOGO.cristais - 2 * Math.max(0, JOGO.vendidos - JOGO.devolvidos), 0, 40);
+  function montarFogueiras() {
+    const rnd = sorteador(1497), pts = [];
+    for (let i = 0; i < 4000 && pts.length < 40; i++) {
+      const x = (rnd() - 0.5) * 200, z = -215 + rnd() * 80;
+      const h = alturaEm(x, z);
+      if (h - alturaMundo(x, z) > 18 && pts.every((p) => Math.hypot(p[0] - x, p[2] - z) > 9)) pts.push([x, h + 1.2, z]);
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pts.flat(), 3));
+    const c = document.createElement('canvas');
+    c.width = c.height = 64;
+    const g = c.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, 'rgba(255,240,200,1)'); gr.addColorStop(0.25, 'rgba(255,160,60,0.9)'); gr.addColorStop(1, 'rgba(255,90,20,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+    fogueiras = new THREE.Points(geo, new THREE.PointsMaterial({ size: 9, map: new THREE.CanvasTexture(c), color: 0xffb060, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: false }));
+    fogueiras.frustumCulled = false;
+    scene.add(fogueiras);
+  }
+
+  // ---------- árvores e pedras: cortar e quebrar ----------
+  const raioRecurso = (r) => (r.tipo === 'arvore' ? 0.45 * r.esc : 1.2 * r.esc);
+  const chaveRec = (r) => Math.round(r.x * 10) + ',' + Math.round(r.z * 10);
+  const animRec = [];   // árvores balançando ou caindo, pedras se partindo
+  const mRec = new THREE.Matrix4(), mRec2 = new THREE.Matrix4(), qRec = new THREE.Quaternion(), qRec2 = new THREE.Quaternion(), vRec = new THREE.Vector3(), eRec = new THREE.Vector3();
+  function poseRecurso(r, eixo, ang, escala, desce) {
+    qRec.setFromAxisAngle(EIXO_Y, r.rot);
+    if (ang) qRec.premultiply(qRec2.setFromAxisAngle(eixo, ang));
+    mRec.compose(vRec.set(r.x, r.y - (desce || 0), r.z), qRec, eRec.setScalar(r.esc * escala));
+    for (const im of r.malhas || []) {
+      im.setMatrixAt(r.indice, mRec2.multiplyMatrices(mRec, im.userData.rel));
+      im.instanceMatrix.needsUpdate = true;
+    }
+  }
+  function eixoDoGolpe(x, z) {
+    const dx = x - heroi.pos.x, dz = z - heroi.pos.z, l = Math.hypot(dx, dz) || 1;
+    return new THREE.Vector3(dz / l, 0, -dx / l);   // girar em volta dele inclina para longe do herói
+  }
+  function baterRecurso(r) {
+    r.golpes = (r.golpes || 0) + 1;
+    const precisa = r.tipo === 'arvore' ? 3 : r.vulcao ? 5 : 4;
+    const eixo = eixoDoGolpe(r.x, r.z);
+    if (r.golpes < precisa) { animRec.push({ r, tipo: 'balanca', t: 0, eixo }); return; }
+    r.fim = true;
+    tirarObstaculo(r.obst);
+    cortados.add(chaveRec(r));
+    if (r.tipo === 'arvore') {
+      const ganho = Math.round(8 + 3 * r.esc);
+      JOGO.madeira += ganho;
+      JOGO.cont.arvores++;
+      flutuar('+' + ganho + ' madeira', r.x, r.y + 3, r.z, COR_TEXTO.madeira);
+      animRec.push({ r, tipo: 'cai', t: 0, eixo });
+    } else {
+      const ganho = Math.round(5 + 3 * r.esc);
+      JOGO.pedra += ganho;
+      JOGO.cont.pedras++;
+      flutuar('+' + ganho + ' pedra', r.x, r.y + 2, r.z, COR_TEXTO.pedra);
+      animRec.push({ r, tipo: 'quebra', t: 0, eixo });
+      // pedra-sol dentro da rocha: mais comum no Teide; garantida de vez em quando na missão de achar a primeira
+      const missaoCristal = MISSOES[JOGO.missao] && MISSOES[JOGO.missao].cristal;
+      if (Math.random() < (r.vulcao ? 0.3 : 0.12) || (missaoCristal && !JOGO.cont.achados && JOGO.cont.pedras % 2 === 0)) achouCristal(r.x, r.y + 2.6, r.z, 'A pedra se abre: lá dentro, uma pedra-sol!');
+    }
+    salvarLogo();
+  }
+  function achouCristal(x, y, z, texto) {
+    JOGO.cristais++;
+    JOGO.cont.achados++;
+    flutuar('+1 pedra-sol', x, y, z, COR_TEXTO.cristais);
+    if (texto && JOGO.cont.achados === 1) alerta(texto, 3.5);
+  }
+  function animarRecursos(dt) {
+    for (let i = animRec.length - 1; i >= 0; i--) {
+      const a = animRec[i];
+      a.t += dt;
+      if (a.tipo === 'balanca') {
+        const k = a.t / 0.4;
+        poseRecurso(a.r, a.eixo, k < 1 ? Math.sin(a.t * 38) * 0.05 * (1 - k) : 0, 1, 0);
+        if (k >= 1) animRec.splice(i, 1);
+      } else if (a.tipo === 'cai') {
+        const k = clamp(a.t / 1.4, 0, 1);
+        const some = clamp((a.t - 1.9) / 0.8, 0, 1);
+        poseRecurso(a.r, a.eixo, k * k * 1.45, 1 - some, some * 0.8);
+        if (some >= 1) { poseRecurso(a.r, a.eixo, 0, 0, 0); animRec.splice(i, 1); }
+      } else {
+        const k = clamp(a.t / 0.7, 0, 1);
+        poseRecurso(a.r, a.eixo, Math.sin(a.t * 50) * 0.04 * (1 - k), 1 - k, k * 0.6);
+        if (k >= 1) { poseRecurso(a.r, a.eixo, 0, 0, 0); animRec.splice(i, 1); }
+      }
+    }
+  }
+  // cristais de pedra-sol soltos no chão (na trilha das árvores secas): o golpe recolhe
+  let cristaisChao = [];
+  function pegarCristal(it) {
+    it.pego = true;
+    pegos.add(Math.round(it.x) + ',' + Math.round(it.z));
+    tirarObstaculo(it.obst);
+    if (it.modelo) it.modelo.visible = false;
+    achouCristal(it.x, it.modelo ? it.modelo.position.y + 1.5 : 2, it.z, 'Uma pedra-sol! Ela ainda está quente.');
+    salvarLogo();
+  }
+
+  // ---------- casas: ruína, reerguer, consertar, queimar ----------
+  const COR_RUINA = new THREE.Color(0.3, 0.27, 0.25);
+  const ZERO = new THREE.Matrix4().makeScale(0, 0, 0);
+  const mCasa = new THREE.Matrix4(), mEsc = new THREE.Matrix4(), corCasa = new THREE.Color();
+  function pintarCasa(info, estado) {
+    info.estado = estado;
+    info.anim = 0;
+    for (const p of info.pecas) {
+      p.im.setMatrixAt(p.i, estado === 'pronta' || p.base ? p.m : ZERO);
+      p.im.setColorAt(p.i, estado === 'pronta' ? BRANCO : COR_RUINA);
+      p.im.instanceMatrix.needsUpdate = true;
+      if (p.im.instanceColor) p.im.instanceColor.needsUpdate = true;
+    }
+    info.vida = estado === 'pronta' ? info.vidaMax : 0;
+  }
+  const custoCasa = (c) => ({ madeira: Math.round(8 + 1.5 * c.w * c.d * c.andares), pedra: Math.round(6 + 2 * (c.w + c.d) * (c.base === 'pedra' ? 1 : 0.6)) });
+  function reerguer(info) {
+    const custo = custoCasa(info.c);
+    if (!pagar(custo)) { alerta(faltaTexto(custo)); return; }
+    info.estado = 'subindo';
+    info.anim = 0.001;
+    heroiFaz(ANIM.agir, 1.1);
+    flutuar('Casa reerguida', info.c.x, info.c.andares * 3 + 2, info.c.z, COR_TEXTO.bom);
+  }
+  // a casa sobe do chão: cada peça cresce de baixo para cima, as de cima por último, e a cor queimada clareia
+  function animarCasas(dt) {
+    for (const info of CASAS_INFO) {
+      if (!info.anim) continue;
+      info.anim = Math.min(1, info.anim + dt / 2.4);
+      const H = info.c.andares * 3 + 3;
+      for (const p of info.pecas) {
+        if (!p.base) {
+          const s = clamp((info.anim - (p.m.elements[13] / H) * 0.6) / 0.4, 0, 1);
+          p.im.setMatrixAt(p.i, s <= 0.001 ? ZERO : mCasa.copy(p.m).multiply(mEsc.makeScale(1, s, 1)));
+          p.im.instanceMatrix.needsUpdate = true;
+        }
+        p.im.setColorAt(p.i, corCasa.copy(COR_RUINA).lerp(BRANCO, clamp(info.anim * 1.6, 0, 1)));
+        if (p.im.instanceColor) p.im.instanceColor.needsUpdate = true;
+      }
+      if (info.anim >= 1) { pintarCasa(info, 'pronta'); salvarLogo(); }
+    }
+  }
+  const custoConserto = (vida, max) => ({ madeira: Math.max(1, Math.ceil((1 - vida / max) * 10)) });
+  function consertarCasa(info) {
+    const custo = custoConserto(info.vida, info.vidaMax);
+    if (!pagar(custo)) { alerta(faltaTexto(custo)); return; }
+    info.vida = info.vidaMax;
+    heroiFaz(ANIM.agir, 0.9);
+    flutuar('Consertada', info.c.x, info.c.andares * 3 + 2, info.c.z, COR_TEXTO.bom);
+  }
+  function ferirCasa(info, dano) {
+    if (info.estado !== 'pronta') return;
+    info.vida -= dano;
+    if (!info.avisada) { info.avisada = true; alerta('Estão atacando uma casa!', 2.5); }
+    if (info.vida <= 0) {
+      pintarCasa(info, 'ruina');
+      info.avisada = false;
+      alerta('Queimaram uma casa! Reerga com F.', 3.5);
+      salvarLogo();
+    }
+  }
+
+  // ---------- obras do jogador (tecla B) ----------
+  const OBRAS = [
+    { id: 'cerca', nome: 'Cerca de madeira', desc: '2 m; atrasa quem vem', custo: { madeira: 4 }, vida: 70, peca: 'Prop_WoodenFence_Single', caixa: [1.0, 0.2], dist: 2.6 },
+    { id: 'muro', nome: 'Muro de pedra', desc: '2 m de largura e 3 de altura; aguenta muito', custo: { pedra: 6 }, vida: 260, peca: 'Wall_UnevenBrick_Straight', caixa: [1.0, 0.3], dist: 2.6 },
+    { id: 'torre', nome: 'Torre de arqueiro', desc: 'o arqueiro atira em quem chega a 45 m', custo: { madeira: 30, pedra: 20, ouro: 25 }, vida: 340, item: 'torre-vigia', escala: 0.6, caixa: [2.1, 1.9], dist: 6.5, arqueiro: true },
+    { id: 'porco', nome: 'Porco', desc: 'rende 1 de ouro a cada 30 s', custo: { ouro: 12 }, vida: 25, item: 'porco', caixa: [0.35, 0.5], dist: 2.2, renda: 30 },
+    { id: 'galo', nome: 'Galinha', desc: 'rende 1 de ouro a cada 45 s', custo: { ouro: 6 }, vida: 15, item: 'galo', caixa: [0.12, 0.12], dist: 1.8, renda: 45 },
+  ];
+  let obraFantasma = null;
+  function modeloDaObra(def, fantasma) {
+    let base;
+    if (def.peca) {
+      if (!PECAS[def.peca]) return null;
+      base = PECAS[def.peca].clone();
+      base.position.set(0, 0, 0); base.rotation.set(0, 0, 0); base.scale.set(1, 1, 1);
+    } else {
+      if (!MODELOS_ITENS[def.item]) return null;
+      base = MODELOS_ITENS[def.item].scene.clone();
+      base.scale.setScalar(def.escala || 1);
+    }
+    const grupo = new THREE.Group();
+    grupo.add(base);
+    grupo.traverse((o) => {
+      if (!o.isMesh) return;
+      o.castShadow = !fantasma;
+      o.receiveShadow = !fantasma;
+      if (fantasma) {
+        o.material = o.material.clone();
+        o.material.transparent = true;
+        o.material.opacity = 0.55;
+        o.material.depthWrite = false;
+        o.userData.cor = o.material.color.clone();
+      }
+    });
+    return grupo;
+  }
+  function entrarNaObra(def) {
+    sairDaObra();
+    const grupo = modeloDaObra(def, true);
+    if (!grupo) { alerta('Esse modelo ainda não carregou'); return; }
+    scene.add(grupo);
+    obraFantasma = { def, grupo, x: 0, z: 0, rot: 0, ok: false };
+    fecharMenu();
+  }
+  function sairDaObra() {
+    if (!obraFantasma) return;
+    scene.remove(obraFantasma.grupo);
+    obraFantasma.grupo.traverse((o) => { if (o.isMesh) o.material.dispose(); });
+    obraFantasma = null;
+  }
+  const VERDE = new THREE.Color(0.55, 1, 0.55), VERMELHO = new THREE.Color(1, 0.4, 0.35);
+  function atualizarFantasma() {
+    const f = obraFantasma, d = f.def;
+    f.rot = Math.round(heroi.ang / (Math.PI / 4)) * (Math.PI / 4);
+    f.x = Math.round((heroi.pos.x + Math.sin(heroi.ang) * d.dist) * 2) / 2;
+    f.z = Math.round((heroi.pos.z + Math.cos(heroi.ang) * d.dist) * 2) / 2;
+    f.grupo.position.set(f.x, alturaMundo(f.x, f.z), f.z);
+    f.grupo.rotation.y = f.rot;
+    // não pode em cima de outra coisa nem em cima do herói
+    const caixa = { x: f.x, z: f.z, hx: d.caixa[0], hz: d.caixa[1], c: Math.cos(f.rot), s: Math.sin(f.rot) };
+    const raio = Math.min(d.caixa[0], d.caixa[1]) + 0.1;
+    f.ok = distCaixa(caixa, heroi.pos.x, heroi.pos.z) > 0.5 && !obstaculos.some((o) => o.hx > 0 && Math.abs(o.x - f.x) < 30 && Math.abs(o.z - f.z) < 30 && distCaixa(o, f.x, f.z) < raio);
+    const tom = f.ok && temRecursos(d.custo) ? VERDE : VERMELHO;
+    f.grupo.traverse((o) => { if (o.isMesh) o.material.color.copy(o.userData.cor).multiply(tom); });
+  }
+  function erguerObra() {
+    const f = obraFantasma;
+    if (!f) return;
+    if (!f.ok) { alerta('Não cabe aqui: procure um lugar livre'); return; }
+    if (!pagar(f.def.custo)) { alerta(faltaTexto(f.def.custo)); return; }
+    criarObra(f.def, f.x, f.z, f.rot, false);
+  }
+  function criarObra(def, x, z, rot, doSalvo) {
+    const grupo = modeloDaObra(def, false);
+    if (!grupo) return null;
+    const y = alturaMundo(x, z);
+    grupo.position.set(x, y, z);
+    grupo.rotation.y = rot;
+    scene.add(grupo);
+    const o = { def, x, z, y, rot, grupo, vida: def.vida, vidaMax: def.vida, tiro: 0, tRenda: 0, obst: obstaculo(x, z, def.caixa[0], def.caixa[1], rot) };
+    obras.push(o);
+    if (!doSalvo) {
+      if (def.id === 'torre') JOGO.cont.torres++;
+      if (def.id === 'cerca' || def.id === 'muro') JOGO.cont.muros++;
+      flutuar(def.nome, x, y + 2.5, z, COR_TEXTO.bom);
+      salvarLogo();
+    }
+    return o;
+  }
+  function ferirObra(o, dano) {
+    o.vida -= dano;
+    if (o.vida > 0) return;
+    scene.remove(o.grupo);
+    tirarObstaculo(o.obst);
+    tirarBarra(o);
+    obras.splice(obras.indexOf(o), 1);
+    alerta('Derrubaram: ' + o.def.nome.toLowerCase(), 2.5);
+    salvarLogo();
+  }
+  function consertarObra(o) {
+    const custo = o.def.id === 'muro' ? { pedra: Math.max(1, Math.ceil((1 - o.vida / o.vidaMax) * 6)) } : custoConserto(o.vida, o.vidaMax);
+    if (!pagar(custo)) { alerta(faltaTexto(custo)); return; }
+    o.vida = o.vidaMax;
+    heroiFaz(ANIM.agir, 0.9);
+  }
+
+  // ---------- flechas das torres ----------
+  const flechas = [];
+  const GEO_FLECHA = new THREE.CylinderGeometry(0.03, 0.03, 0.9, 5).rotateX(Math.PI / 2);
+  const MAT_FLECHA = new THREE.MeshStandardMaterial({ color: 0x5a3d22, roughness: 0.8 });
+  function atirar(o, e) {
+    const m = new THREE.Mesh(GEO_FLECHA, MAT_FLECHA);
+    const ini = new THREE.Vector3(o.x, o.y + 6.6, o.z);
+    const d = ini.distanceTo(e.pos);
+    scene.add(m);
+    flechas.push({ m, ini, e, t: 0, dur: Math.max(0.25, d / 40), arco: d * 0.08, ant: ini.clone() });
+  }
+  const vFlecha = new THREE.Vector3();
+  function atualizarFlechas(dt) {
+    for (let i = flechas.length - 1; i >= 0; i--) {
+      const f = flechas[i];
+      f.t += dt;
+      const k = Math.min(1, f.t / f.dur);
+      vFlecha.set(f.e.pos.x, f.e.pos.y + f.e.def.altura * 0.6, f.e.pos.z);
+      f.m.position.lerpVectors(f.ini, vFlecha, k);
+      f.m.position.y += 4 * k * (1 - k) * f.arco;
+      f.m.lookAt(f.m.position.clone().multiplyScalar(2).sub(f.ant));
+      f.ant.copy(f.m.position);
+      if (k >= 1) {
+        if (!f.e.morto) ferirInimigo(f.e, 14, f.ini.x, f.ini.z);
+        scene.remove(f.m);
+        flechas.splice(i, 1);
+      }
+    }
+  }
+  function atualizarObras(dt) {
+    for (const o of obras) {
+      if (o.def.arqueiro) {
+        o.tiro -= dt;
+        if (o.tiro > 0) continue;
+        let alvo = null, md = 45;
+        for (const e of inimigos) {
+          if (e.morto || e.estado === 'estatua' || e.estado === 'guarda') continue;
+          const d = dist2(e.pos.x, e.pos.z, o.x, o.z);
+          if (d < md) { md = d; alvo = e; }
+        }
+        if (alvo) { atirar(o, alvo); o.tiro = 1.3; } else o.tiro = 0.4;
+      } else if (o.def.renda) {
+        o.tRenda += dt;
+        if (o.tRenda >= o.def.renda) { o.tRenda = 0; JOGO.ouro++; }
+      }
+    }
+  }
+
+  // ---------- pessoas e inimigos (modelos) ----------
+  // Os Cinzentos usam o corpo do herói com a roupa desbotada e o rosto pintado de cinza (como na história).
+  const desbotar = (mt) => {
+    mt.onBeforeCompile = (sh) => {
+      sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', '#include <map_fragment>\n  diffuseColor.rgb = mix(diffuseColor.rgb, min(vec3(1.0), vec3(dot(diffuseColor.rgb, vec3(0.3, 0.59, 0.11))) * vec3(1.55, 1.6, 1.7) + 0.06), 0.85);');
+    };
+    mt.customProgramCacheKey = () => 'cinzento';
+  };
+  function prepararModelo(m, ajuste) {
+    const mats = [];
+    const clonar = (mt) => { const c = mt.clone(); if (ajuste) ajuste(c); mats.push({ mat: c, em: c.emissive ? c.emissive.clone() : null }); return c; };
+    m.traverse((o) => {
+      if (!o.isMesh) return;
+      o.castShadow = true;
+      o.receiveShadow = true;
+      o.frustumCulled = false;
+      o.material = Array.isArray(o.material) ? o.material.map(clonar) : clonar(o.material);
+    });
+    return mats;
+  }
+  // Diabrete e porco-goblin têm o mesmo esqueleto do herói, mas outras proporções: das animações dele ficam só as
+  // rotações dos ossos e o sobe-e-desce da bacia, na escala de cada um (senão o corpo estica).
+  const cacheClipes = {};
+  function clipesProporcionais(tipo) {
+    if (cacheClipes[tipo]) return cacheClipes[tipo];
+    const bacia = MODELOS_INIMIGOS[tipo].scene.getObjectByName('pelvis');
+    const razao = bacia ? bacia.position.length() / 0.95 : 1;   // 0,95 m: a bacia do herói
+    cacheClipes[tipo] = CLIPES_HEROI.map((c) => new THREE.AnimationClip(c.name, c.duration, c.tracks
+      .filter((t) => t.name.endsWith('.quaternion') || t.name === 'pelvis.position')
+      .map((t) => {
+        if (t.name !== 'pelvis.position') return t;
+        const n = t.clone();
+        for (let i = 0; i < n.values.length; i++) n.values[i] *= razao;
+        return n;
+      })));
+    return cacheClipes[tipo];
+  }
+  const ANIMS_HUMANAS = { parado: 'Idle_Loop', andar: 'Walk_Loop', correr: 'Jog_Fwd_Loop', ataque: 'Sword_Attack', ferido: 'Hit_Chest', morte: 'Death01' };
+  const TIPOS = {
+    cinzento: { nome: 'Cinzento', vida: 45, dano: 8, vel: 3.1, raio: 0.45, alcance: 1.8, cadencia: 1.7, golpe: 0.5, ouro: 6, altura: 2.15, anims: ANIMS_HUMANAS, passo: 5.9 },
+    diabrete: { nome: 'Diabrete', vida: 34, dano: 6, vel: 3.8, raio: 0.5, alcance: 1.8, cadencia: 1.4, golpe: 0.5, ouro: 5, altura: 1.9, anims: ANIMS_HUMANAS, passo: 4.8 },
+    puglin: { nome: 'Porco-goblin', vida: 42, dano: 7, vel: 3.0, raio: 0.55, alcance: 1.7, cadencia: 1.6, golpe: 0.5, ouro: 5, altura: 1.5, anims: ANIMS_HUMANAS, passo: 3.2 },
+    orc: { nome: 'Orc', vida: 170, dano: 15, vel: 2.8, raio: 0.75, alcance: 2.4, cadencia: 2.1, golpe: 0.6, ouro: 40, altura: 2.5, anims: { parado: 'parado1', andar: 'andar', correr: 'correr', ataque: 'ataque1', ferido: 'golpe_recebido', morte: 'morte' }, passo: 3.5 },
+    guardiao: { nome: 'O Guardião', vida: 450, dano: 24, vel: 2.1, raio: 1.4, alcance: 3.3, cadencia: 2.4, golpe: 0.8, ouro: 150, altura: 5, anims: null, passo: 1 },
+  };
+  function criarInimigo(tipo, x, z, opcoes) {
+    const def = TIPOS[tipo];
+    let modelo, clipes = [], materiais;
+    if (tipo === 'cinzento') {
+      if (!heroi.modelo) return null;
+      modelo = THREE.SkeletonUtils.clone(heroi.modelo);
+      materiais = prepararModelo(modelo, desbotar);
+      clipes = CLIPES_HEROI;
+    } else {
+      const g = MODELOS_INIMIGOS[tipo];
+      if (!g) return null;
+      modelo = def.anims ? THREE.SkeletonUtils.clone(g.scene) : g.scene.clone();
+      materiais = prepararModelo(modelo);
+      clipes = tipo === 'orc' ? g.animations : def.anims ? clipesProporcionais(tipo) : [];
+    }
+    const grupo = new THREE.Group();
+    grupo.add(modelo);
+    scene.add(grupo);
+    const e = Object.assign({
+      tipo, def, grupo, modelo, materiais, mixer: null, acoes: {}, atual: null,
+      pos: new THREE.Vector3(x, alturaMundo(x, z), z), ang: 0, vida: def.vida, estado: 'guarda', casa: { x, z },
+      rota: null, iRota: 0, plano: 'roubar', alvoObj: null, tAtaque: 0, golpeEm: 0, golpeAlvo: null, atordoado: 0,
+      provocado: 0, morto: false, tMorte: 0, desvio: 0, lado: 1, tPreso: 0, ultimo: new THREE.Vector3(x, 0, z),
+      roubando: 0, carga: null, onda: false, cacador: false, flash: 0, bloqueio: null, tempo: Math.random() * 10,
+    }, opcoes || {});
+    if (clipes.length) {
+      e.mixer = new THREE.AnimationMixer(modelo);
+      for (const [k, nome] of Object.entries(def.anims)) {
+        const clipe = clipes.find((c) => c.name === nome);
+        if (!clipe) continue;
+        const a = e.mixer.clipAction(clipe);
+        if (k === 'ataque' || k === 'ferido' || k === 'morte') { a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true; }
+        e.acoes[k] = a;
+      }
+      tocarInimigo(e, 'parado');
+      if (e.atual) e.atual.time = Math.random() * e.atual.getClip().duration;
+    }
+    assentar(e);
+    inimigos.push(e);
+    return e;
+  }
+  function tocarInimigo(e, nome, fade, deNovo) {
+    const nova = e.acoes[nome];
+    if (!nova || (e.atual === nova && !deNovo)) return;
+    nova.reset().setEffectiveWeight(1).fadeIn(fade || 0.2).play();
+    if (e.atual && e.atual !== nova) e.atual.fadeOut(fade || 0.2);
+    e.atual = nova;
+  }
+  function assentar(e) {
+    e.pos.y = alturaMundo(e.pos.x, e.pos.z);
+    e.grupo.position.copy(e.pos);
+    e.grupo.rotation.y = e.ang;
+  }
+  function tirarInimigo(e) {
+    scene.remove(e.grupo);
+    tirarBarra(e);
+    for (const m of e.materiais) m.mat.dispose();
+    inimigos.splice(inimigos.indexOf(e), 1);
+  }
+  function ferirInimigo(e, dano, deX, deZ) {
+    if (e.morto) return;
+    if (e.estado === 'estatua') { flutuar('a pedra não cede', e.pos.x, e.pos.y + 3, e.pos.z, '#ccc'); return; }
+    e.vida -= dano;
+    e.provocado = 12;
+    e.flash = 0.18;
+    flutuar('-' + dano, e.pos.x, e.pos.y + e.def.altura + 0.3, e.pos.z, COR_TEXTO.dano);
+    if (e.estado === 'guarda') e.estado = 'lutar';
+    if (e.vida <= 0) { morrerInimigo(e); return; }
+    // empurrão para trás (o Guardião quase não sente)
+    const dx = e.pos.x - deX, dz = e.pos.z - deZ, l = Math.hypot(dx, dz) || 1, k = e.tipo === 'guardiao' ? 0.1 : e.tipo === 'orc' ? 0.25 : 0.6;
+    e.pos.x += dx / l * k; e.pos.z += dz / l * k;
+    if (e.golpeEm <= 0 && e.acoes.ferido && e.tipo !== 'orc') { tocarInimigo(e, 'ferido', 0.08, true); e.tAtaque = Math.max(e.tAtaque, 0.6); }
+  }
+  function morrerInimigo(e) {
+    e.morto = true;
+    e.tMorte = 0;
+    e.golpeEm = 0;
+    tirarBarra(e);
+    tocarInimigo(e, 'morte', 0.15, true);
+    JOGO.ouro += e.def.ouro;
+    flutuar('+' + e.def.ouro + ' ouro', e.pos.x, e.pos.y + e.def.altura + 0.8, e.pos.z, COR_TEXTO.ouro);
+    if (e.carga) {
+      for (const [k, v] of Object.entries(e.carga)) JOGO[k] += v;
+      flutuar('recuperou o que foi roubado', e.pos.x, e.pos.y + 1.2, e.pos.z, COR_TEXTO.bom);
+      e.carga = null;
+    }
+    if (e.tipo === 'guardiao') guardiaoCaiu();
+  }
+  // golpe do inimigo chegando no alvo
+  function aplicarGolpe(e) {
+    const a = e.golpeAlvo;
+    if (!a || e.morto) return;
+    if (a.tipo === 'heroi') {
+      if (dist2(heroi.pos.x, heroi.pos.z, e.pos.x, e.pos.z) <= e.def.alcance + 0.9) ferirHeroi(e.def.dano);
+    } else if (a.tipo === 'casa') ferirCasa(a.info, e.def.dano);
+    else if (a.tipo === 'obra' && obras.includes(a.obra)) ferirObra(a.obra, e.def.dano);
+  }
+  function escolherAlvo(e) {
+    let melhor = null, md = Infinity;
+    for (const info of CASAS_INFO) {
+      if (info.estado !== 'pronta') continue;
+      const d = dist2(info.c.x, info.c.z, e.pos.x, e.pos.z);
+      if (d < md) { md = d; melhor = { tipo: 'casa', info, x: info.c.x, z: info.c.z, obst: info.c.obst }; }
+    }
+    for (const o of obras) {
+      const d = dist2(o.x, o.z, e.pos.x, e.pos.z) + (o.def.renda ? -8 : 0);   // os bichos atraem
+      if (d < md) { md = d; melhor = { tipo: 'obra', obra: o, x: o.x, z: o.z, obst: o.obst }; }
+    }
+    return melhor;
+  }
+  const alvoValido = (a) => a && (a.tipo === 'casa' ? a.info.estado === 'pronta' : obras.includes(a.obra));
+  const PRACA = { x: 0, z: 0 };
+  function roubar(e) {
+    const carga = { madeira: Math.floor(JOGO.madeira * 0.15), pedra: Math.floor(JOGO.pedra * 0.15), ouro: Math.floor(JOGO.ouro * 0.1) };
+    for (const [k, v] of Object.entries(carga)) JOGO[k] -= v;
+    e.carga = carga;
+    const t = Object.entries(carga).filter(([, v]) => v > 0).map(([k, v]) => v + ' ' + NOME_REC[k]).join(', ');
+    if (t) { alerta('Roubaram ' + t + '! Pegue de volta antes que fujam.', 3.5); flutuar('-' + t, e.pos.x, e.pos.y + 2.5, e.pos.z, COR_TEXTO.dano); }
+    e.estado = 'fugir';
+    e.iRota = e.rota.length - 1;
+  }
+  function atualizarInimigo(e, dt) {
+    e.tempo += dt;
+    // longe da câmera (o acampamento no Teide, visto da vila) não é desenhado nem animado
+    e.grupo.visible = dist2(e.pos.x, e.pos.z, camera.position.x, camera.position.z) < 380;
+    if (e.mixer && e.grupo.visible) e.mixer.update(dt);
+    if (e.flash > 0) {
+      e.flash -= dt;
+      for (const m of e.materiais) if (m.em) { if (e.flash > 0) m.mat.emissive.setRGB(0.7, 0.12, 0.05); else m.mat.emissive.copy(m.em); }
+    }
+    if (e.morto) {
+      e.tMorte += dt;
+      if (e.tipo === 'guardiao') e.modelo.rotation.x = -(Math.min(1, e.tMorte / 1.4) ** 2) * 1.45;
+      if (e.tMorte > 4) e.pos.y -= dt * 0.7;
+      e.grupo.position.y = e.pos.y;
+      if (e.tMorte > 7) tirarInimigo(e);
+      return;
+    }
+    if (e.golpeEm > 0) { e.golpeEm -= dt; if (e.golpeEm <= 0) aplicarGolpe(e); }
+    e.tAtaque -= dt;
+    e.provocado = Math.max(0, e.provocado - dt);
+    if (e.estado === 'estatua') return;
+    if (e.atordoado > 0) { e.atordoado -= dt; if (e.golpeEm <= 0) tocarInimigo(e, 'parado'); assentar(e); return; }
+
+    const hx = heroi.pos.x, hz = heroi.pos.z, dh = dist2(hx, hz, e.pos.x, e.pos.z);
+    const heroiVivo = JOGO.morto <= 0;
+    let destino = null, ataque = null, correr = true;
+    const ve = e.estado === 'guarda' ? 16 : 11;
+    if (heroiVivo && (e.cacador || dh < ve || (e.provocado > 0 && dh < 45))) {
+      destino = heroi.pos; ataque = { tipo: 'heroi' };
+    } else if (e.estado === 'guarda' || e.estado === 'lutar') {
+      e.estado = 'guarda';
+      if (dist2(e.casa.x, e.casa.z, e.pos.x, e.pos.z) > 2) { destino = e.casa; correr = false; }
+    } else if (e.estado === 'invadir') {
+      if (e.iRota < e.rota.length) {
+        const p = e.rota[e.iRota];
+        if (dist2(p.x, p.z, e.pos.x, e.pos.z) < 4) e.iRota++;
+        destino = p;
+      } else {
+        if (e.plano === 'destruir') {
+          if (!alvoValido(e.alvoObj)) e.alvoObj = escolherAlvo(e);
+          if (e.alvoObj) { destino = e.alvoObj; ataque = e.alvoObj; } else e.plano = 'roubar';
+        }
+        if (e.plano === 'roubar') {
+          if (dist2(PRACA.x, PRACA.z, e.pos.x, e.pos.z) > 5) destino = PRACA;
+          else { e.roubando += dt; if (e.roubando > 2.5) roubar(e); }
+        }
+      }
+    } else if (e.estado === 'fugir') {
+      if (e.iRota >= 0) {
+        const p = e.rota[e.iRota];
+        if (dist2(p.x, p.z, e.pos.x, e.pos.z) < 4) e.iRota--;
+        destino = p;
+      } else {
+        if (e.carga) alerta('Os ladrões fugiram com a carga.', 2.5);
+        tirarInimigo(e);
+        return;
+      }
+    }
+    // preso atrás de cerca ou muro: derruba
+    if (e.bloqueio && !ataque) {
+      if (obras.includes(e.bloqueio)) ataque = { tipo: 'obra', obra: e.bloqueio, obst: e.bloqueio.obst };
+      else e.bloqueio = null;
+    }
+    // ataca quando alcança
+    if (ataque) {
+      const d = ataque.tipo === 'heroi' ? dh - 0.45 : distCaixa(ataque.obst, e.pos.x, e.pos.z);
+      if (d <= e.def.alcance) {
+        const ax = ataque.tipo === 'heroi' ? hx : ataque.tipo === 'casa' ? ataque.info.c.x : ataque.obra.x;
+        const az = ataque.tipo === 'heroi' ? hz : ataque.tipo === 'casa' ? ataque.info.c.z : ataque.obra.z;
+        let dif = Math.atan2(ax - e.pos.x, az - e.pos.z) - e.ang;
+        dif = Math.atan2(Math.sin(dif), Math.cos(dif));
+        e.ang += dif * (1 - Math.exp(-dt * 10));
+        destino = null;
+        if (e.tAtaque <= 0) {
+          e.tAtaque = e.def.cadencia;
+          e.golpeEm = e.def.golpe;
+          e.golpeAlvo = ataque;
+          tocarInimigo(e, 'ataque', 0.1, true);
+        }
+      }
+    }
+    if (destino && e.golpeEm <= 0 && e.tAtaque < e.def.cadencia - 0.9) {
+      let ang = Math.atan2(destino.x - e.pos.x, destino.z - e.pos.z);
+      if (e.desvio > 0) { e.desvio -= dt; ang += e.lado * 1.2; }
+      let dif = ang - e.ang;
+      dif = Math.atan2(Math.sin(dif), Math.cos(dif));
+      e.ang += dif * (1 - Math.exp(-dt * 8));
+      const vel = correr ? e.def.vel : e.def.vel * 0.45;
+      e.pos.x += Math.sin(e.ang) * vel * dt;
+      e.pos.z += Math.cos(e.ang) * vel * dt;
+      resolverColisao(e.pos, e.def.raio);
+      // não fica preso: se quase não andou em 1 s, derruba a obra que está na frente ou contorna
+      e.tPreso += dt;
+      if (e.tPreso > 1) {
+        if (dist2(e.pos.x, e.pos.z, e.ultimo.x, e.ultimo.z) < vel * 0.3) {
+          const obra = obras.find((o) => distCaixa(o.obst, e.pos.x, e.pos.z) < e.def.raio + 0.6);
+          if (obra) e.bloqueio = obra;
+          else { e.desvio = 1.3; e.lado = Math.random() < 0.5 ? -1 : 1; }
+        }
+        e.ultimo.copy(e.pos);
+        e.tPreso = 0;
+      }
+      if (e.acoes.correr || e.acoes.andar) {
+        tocarInimigo(e, correr && e.acoes.correr ? 'correr' : 'andar');
+        if (e.atual) e.atual.timeScale = clamp(vel / (correr ? e.def.passo : e.def.passo * 0.3), 0.6, 1.8);
+      }
+      if (e.tipo === 'guardiao') e.modelo.position.y = Math.abs(Math.sin(e.tempo * 4.5)) * 0.18;
+    } else if (e.golpeEm <= 0 && e.tAtaque < e.def.cadencia - 0.9) {
+      tocarInimigo(e, 'parado', 0.3);
+      if (e.estado === 'guarda' && !ataque) {
+        let dif = voltadoPara(e.pos.x, e.pos.z, SUL.x, SUL.z) - e.ang;
+        e.ang += Math.atan2(Math.sin(dif), Math.cos(dif)) * (1 - Math.exp(-dt * 2));
+      }
+    }
+    // o Guardião se inclina no golpe
+    if (e.tipo === 'guardiao') e.modelo.rotation.x = e.golpeEm > 0 ? Math.sin((1 - e.golpeEm / e.def.golpe) * Math.PI) * 0.3 : 0;
+    // não atravessa o herói nem os outros
+    if (heroiVivo && dh < e.def.raio + 0.45 && dh > 1e-3) {
+      const k = (e.def.raio + 0.45 - dh) / dh;
+      e.pos.x += (e.pos.x - hx) * k; e.pos.z += (e.pos.z - hz) * k;
+    }
+    assentar(e);
+  }
+  function separarInimigos() {
+    for (let i = 0; i < inimigos.length; i++) {
+      const a = inimigos[i];
+      if (a.morto) continue;
+      for (let j = i + 1; j < inimigos.length; j++) {
+        const b = inimigos[j];
+        if (b.morto) continue;
+        const dx = b.pos.x - a.pos.x, dz = b.pos.z - a.pos.z, d = Math.hypot(dx, dz), min = a.def.raio + b.def.raio;
+        if (d >= min || d < 1e-4) continue;
+        const k = (min - d) / d * 0.5;
+        a.pos.x -= dx * k; a.pos.z -= dz * k; b.pos.x += dx * k; b.pos.z += dz * k;
+      }
+    }
+  }
+
+  // ---------- ataques (ondas) ----------
+  // Os Cinzentos descem do Teide pelo oeste (e pelo sul, depois); os diabos saem pelo portal ao pé do Pico.
+  const ROTAS = {
+    oeste: [{ x: -300, z: -170 }, { x: -140, z: -45 }, { x: -48, z: 0 }, { x: -18, z: 0 }],
+    sul: [{ x: 30, z: 330 }, { x: 4, z: 70 }, { x: 0, z: 30 }, { x: 0, z: 17 }],
+    portal: [{ x: 0, z: -80 }, { x: 0, z: -48 }, { x: 0, z: -17 }],
+  };
+  const filaSpawn = [];
+  function lancarOnda(especial) {
+    JOGO.onda++;
+    const n = JOGO.onda, ira = Math.max(0, JOGO.vendidos - JOGO.devolvidos);
+    const lista = [];
+    const por = (tipo, rota, q) => { for (let i = 0; i < q; i++) lista.push([tipo, rota]); };
+    if (especial === 'guardiao') {
+      por('guardiao', 'portal', 1); por('diabrete', 'portal', 3); por('cinzento', 'oeste', 3);
+    } else {
+      por('cinzento', 'oeste', Math.min(2 + Math.ceil(n / 2), 5));
+      if (n >= 3) por('cinzento', 'sul', Math.min(n - 2, 3));
+      if (n >= 2) por('diabrete', 'portal', Math.min(n - 1 + ira, 7));
+      if (n >= 3) por('puglin', 'portal', Math.min(n - 2, 4));
+      if (n >= 4) por('orc', 'oeste', 1 + (n >= 7 ? 1 : 0));
+    }
+    lista.forEach(([tipo, rota], i) => filaSpawn.push({ t: i * 0.9, tipo, rota, plano: tipo !== 'cinzento' || i % 2 ? 'destruir' : 'roubar' }));
+    const vemPortal = lista.some((l) => l[1] === 'portal'), vemOeste = lista.some((l) => l[1] === 'oeste');
+    if (especial === 'guardiao') alerta('O céu escureceu. O portal se abriu!', 4);
+    else alerta(vemOeste && vemPortal ? 'Assobios no oeste e uivos no portal: estão vindo!' : 'Assobios no oeste: os Cinzentos estão descendo do Teide!', 4);
+    JOGO.ondaAtiva = true;
+  }
+  function atualizarOndas(dt) {
+    for (let i = filaSpawn.length - 1; i >= 0; i--) {
+      const s = filaSpawn[i];
+      s.t -= dt;
+      if (s.t > 0) continue;
+      filaSpawn.splice(i, 1);
+      const r = ROTAS[s.rota], p = r[0];
+      const e = criarInimigo(s.tipo, p.x + (Math.random() - 0.5) * 6, p.z + (Math.random() - 0.5) * 4, { estado: 'invadir', rota: r, iRota: 1, plano: s.plano, onda: true, cacador: s.tipo === 'guardiao' });
+      if (e) e.ang = Math.atan2(r[1].x - p.x, r[1].z - p.z);
+    }
+    if (JOGO.ondaAtiva && !filaSpawn.length && !inimigos.some((e) => e.onda && !e.morto)) {
+      JOGO.ondaAtiva = false;
+      JOGO.cont.noites++;
+      alerta('A vila resistiu ao ataque!', 3);
+      salvarLogo();
+    }
+  }
+  // O acampamento dos vilões no Teide: guardas que só lutam se Duarte chegar perto; o Guardião dorme, de pedra,
+  // até o dia escuro.
+  function montarAcampamento() {
+    const v = (x, z) => voltadoPara(x, z, SUL.x, SUL.z);
+    for (const [tipo, x, z] of [['orc', 82, -1440], ['diabrete', 50, -1440], ['diabrete', 76, -1470], ['puglin', 58, -1478], ['puglin', 90, -1452], ['cinzento', 70, -1425], ['cinzento', 95, -1470]]) {
+      const e = criarInimigo(tipo, x, z, { estado: 'guarda' });
+      if (e) { e.ang = v(x, z); assentar(e); }
+    }
+    if (!JOGO.guardiaoMorto) {
+      const g = criarInimigo('guardiao', 40, -1478, { estado: 'estatua' });
+      if (g) { g.ang = v(40, -1478); assentar(g); }
+    }
+  }
+  function soltarGuardiao() {
+    if (JOGO.guardiaoMorto) return;
+    JOGO.escuroAlvo = 1;
+    const est = inimigos.find((e) => e.tipo === 'guardiao' && !e.morto);
+    if (est) tirarInimigo(est);
+    lancarOnda('guardiao');
+  }
+  function guardiaoCaiu() {
+    JOGO.guardiaoMorto = true;
+    JOGO.escuroAlvo = 0;
+    alerta('O Guardião caiu de joelhos.', 4);
+  }
+
+  // ---------- o herói: golpe, ferimento, queda, a Luz ----------
+  const DANO_HEROI = 18;
+  function heroiFaz(nome, dura) {
+    if (!heroi.acoes[nome]) return;
+    heroi.atual = null;
+    tocar(nome, 0.1);
+    heroi.ocupado = dura;
+    heroi.golpe = 0;
+  }
+  function golpeDoHeroi() {
+    const fx = Math.sin(heroi.ang), fz = Math.cos(heroi.ang), hx = heroi.pos.x, hz = heroi.pos.z;
+    let acertou = false;
+    for (const e of inimigos) {
+      if (e.morto) continue;
+      const dx = e.pos.x - hx, dz = e.pos.z - hz, d = Math.hypot(dx, dz);
+      if (d > 2.4 + e.def.raio) continue;
+      if (d > 0.9 && (dx * fx + dz * fz) / d < 0.3) continue;
+      ferirInimigo(e, DANO_HEROI, hx, hz);
+      acertou = true;
+    }
+    if (acertou) return;
+    let melhor = null, md = 1.6;
+    for (const r of RECURSOS) {
+      if (r.fim) continue;
+      const dx = r.x - hx, dz = r.z - hz;
+      if (Math.abs(dx) > 6 || Math.abs(dz) > 6) continue;
+      const dc = Math.hypot(dx, dz), d = dc - raioRecurso(r);
+      if (d >= md || (dc > 0.6 && (dx * fx + dz * fz) / dc < 0.2)) continue;
+      melhor = r; md = d;
+    }
+    if (melhor) { baterRecurso(melhor); return; }
+    for (const it of cristaisChao) {
+      if (it.pego) continue;
+      const dx = it.x - hx, dz = it.z - hz, d = Math.hypot(dx, dz);
+      if (d < 2.4 && (d < 0.8 || (dx * fx + dz * fz) / d > 0.2)) { pegarCristal(it); return; }
+    }
+  }
+  function ferirHeroi(dano) {
+    if (JOGO.morto > 0 || JOGO.invulneravel > 0 || JOGO.pausado) return;
+    JOGO.vida = Math.max(0, JOGO.vida - dano);
+    JOGO.semDano = 0;
+    const d = $('dano');
+    d.style.opacity = 1;
+    setTimeout(() => { d.style.opacity = 0; }, 160);
+    if (JOGO.vida <= 0) { heroiCaiu(); return; }
+    if (heroi.golpe <= 0 && heroi.ocupado <= 0) heroiFaz(ANIM.ferido, 0.45);
+  }
+  function heroiCaiu() {
+    JOGO.morto = 4.5;
+    heroiFaz(ANIM.morte, 4.5);
+    sairDaObra();
+    fecharMenu();
+    alerta('Duarte caiu…', 4);
+  }
+  function heroiLevanta() {
+    const perda = { madeira: Math.floor(JOGO.madeira * 0.2), pedra: Math.floor(JOGO.pedra * 0.2) };
+    JOGO.madeira -= perda.madeira; JOGO.pedra -= perda.pedra;
+    JOGO.vida = JOGO.vidaMax;
+    JOGO.invulneravel = 3;
+    teleportar(0, 6, Math.PI);
+    heroi.ocupado = 0;
+    heroi.atual = null;
+    tocar(ANIM.parado);
+    falar([['Brites', 'Trouxemos você de volta para a praça. Na confusão, sumiu um pouco da lenha e da pedra.']]);
+  }
+  // A Luz: Duarte ergue uma pedra-sol guardada; os diabos perto recuam e ficam tontos (a pedra não se gasta)
+  let esferaLuz = null;
+  function usarLuz() {
+    if (JOGO.missao < 8 && !JOGO.fim) { alerta('Duarte ainda não sabe usar a pedra-sol'); return; }
+    if (JOGO.cristais < 1) { alerta('A Luz precisa de uma pedra-sol guardada'); return; }
+    if (JOGO.luz > 0) { alerta('A Luz volta em ' + Math.ceil(JOGO.luz) + ' s'); return; }
+    JOGO.luz = 20;
+    heroiFaz(ANIM.magia, 1.0);
+    if (!esferaLuz) {
+      esferaLuz = new THREE.Mesh(new THREE.SphereGeometry(1, 24, 16), new THREE.MeshBasicMaterial({ color: 0xffc070, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
+      scene.add(esferaLuz);
+    }
+    esferaLuz.userData.t = 0;
+    esferaLuz.visible = true;
+    for (const e of inimigos) {
+      if (e.morto || e.estado === 'estatua') continue;
+      if (dist2(e.pos.x, e.pos.z, heroi.pos.x, heroi.pos.z) > 14) continue;
+      ferirInimigo(e, e.tipo === 'guardiao' ? 40 : 25, heroi.pos.x, heroi.pos.z);
+      e.atordoado = e.tipo === 'guardiao' ? 1.5 : 3.5;
+    }
+  }
+  function animarLuz(dt) {
+    if (!esferaLuz || !esferaLuz.visible) return;
+    const t = (esferaLuz.userData.t += dt), k = t / 0.6;
+    esferaLuz.position.set(heroi.pos.x, heroi.pos.y + 1.2, heroi.pos.z);
+    esferaLuz.scale.setScalar(1 + 13 * k);
+    esferaLuz.material.opacity = 0.5 * (1 - k);
+    if (k >= 1) esferaLuz.visible = false;
+  }
+  function teleportar(x, z, ang) {
+    heroi.pos.set(x, alturaEm(x, z), z);
+    heroi.ang = ang;
+    cam.yaw = ang;
+    encaixarCamera();
+  }
+  function encaixarCamera() {
+    const h = Math.cos(cam.inc) * cam.dist;
+    camera.position.set(heroi.pos.x - Math.sin(cam.yaw) * h, heroi.pos.y + 1.3 + Math.sin(cam.inc) * cam.dist, heroi.pos.z - Math.cos(cam.yaw) * h);
+    alvoCam.set(heroi.pos.x, heroi.pos.y + 1.3, heroi.pos.z);
+  }
+
+  // ---------- o mercador, o portal e o círculo de ritual ----------
+  let LANFRANCO = null;
+  const PORTAL = { x: 0, z: -80 }, SAIDA_TEIDE = { x: 62, z: -1392 }, CIRCULO = { x: 65, z: -1455 };
+  function montarLanfranco() {
+    if (!heroi.modelo) return;
+    const m = THREE.SkeletonUtils.clone(heroi.modelo);
+    prepararModelo(m, (mt) => mt.color.multiply(new THREE.Color(1.0, 0.6, 0.42)));
+    const x = -57, z = 6;
+    m.position.set(x, alturaMundo(x, z), z);
+    m.rotation.y = Math.PI / 2;
+    scene.add(m);
+    const mixer = new THREE.AnimationMixer(m);
+    const clipe = CLIPES_HEROI.find((c) => c.name === 'Idle_Loop');
+    if (clipe) mixer.clipAction(clipe).play();
+    LANFRANCO = { x, z, modelo: m, mixer };
+    obstaculo(x, z, 0.4, 0.4, 0);
+  }
+  function abrirMercador() {
+    if (!JOGO.cont.mercador) {
+      JOGO.cont.mercador = 1;
+      falar([['Lanfranco', 'Madeira para navios, pedra para o cais. E se achar pedra-sol... pago o preço de uma casa.']]);
+    }
+    abrirMenu('mercador', 'Lanfranco, o mercador', [
+      { nome: 'Vender 10 de madeira', desc: 'recebe 6 de ouro', pode: () => JOGO.madeira >= 10, fazer: () => vender('madeira', 10, 6) },
+      { nome: 'Vender 10 de pedra', desc: 'recebe 8 de ouro', pode: () => JOGO.pedra >= 10, fazer: () => vender('pedra', 10, 8) },
+      { nome: 'Vender 1 pedra-sol', desc: 'recebe 60 de ouro (mas o Teide acorda um pouco)', pode: () => JOGO.cristais >= 1, fazer: venderCristal },
+    ], 'Teclas 1 a 3 · Esc fecha');
+  }
+  function vender(rec, q, preco) {
+    JOGO[rec] -= q;
+    JOGO.ouro += preco;
+    JOGO.cont.vendas++;
+    flutuar('+' + preco + ' ouro', LANFRANCO.x, 2.4, LANFRANCO.z, COR_TEXTO.ouro);
+    salvarLogo();
+  }
+  function venderCristal() {
+    JOGO.cristais--;
+    JOGO.vendidos++;
+    JOGO.ouro += 60;
+    JOGO.cont.vendas++;
+    flutuar('+60 ouro', LANFRANCO.x, 2.4, LANFRANCO.z, COR_TEXTO.ouro);
+    if (JOGO.vendidos === 1) falar([['Lanfranco', 'Uma beleza. O navio leva no fim do mês.'], ['Brites', 'Olhe o paredão esta noite. Vai ter uma fogueira a menos... duas, talvez.']]);
+    salvarLogo();
+  }
+  function irAoTeide() {
+    teleportar(SAIDA_TEIDE.x, SAIDA_TEIDE.z + 4, Math.PI);
+    if (!JOGO.foiAoTeide) {
+      JOGO.foiAoTeide = true;
+      falar([['Duarte', 'O tubo de lava sai no Teide... e lá embaixo está o acampamento dos Cinzentos.'], ['Duarte', 'O círculo de pedra no meio deles é onde as pedras-sol voltam para o fogo.']]);
+    }
+  }
+  function devolverCristais() {
+    const n = JOGO.cristais;
+    JOGO.devolvidos += n;
+    JOGO.cristais = 0;
+    heroiFaz(ANIM.agir, 1.1);
+    alerta(n + (n > 1 ? ' pedras-sol voltaram' : ' pedra-sol voltou') + ' ao fogo. O paredão acende de novo.', 4);
+    if (JOGO.devolvidos >= 3 && !JOGO.avisouFogueiras) { JOGO.avisouFogueiras = true; falar([['Duarte', 'Ouço o vulcão respirar mais devagar.']]); }
+    salvarLogo();
+  }
+
+  // ---------- menus (mercador e obras) ----------
+  let menuAberto = null, menuOpcoes = [];
+  function abrirMenu(id, titulo, opcoes, pe) {
+    menuAberto = id;
+    menuOpcoes = opcoes;
+    $('menu-titulo').textContent = titulo;
+    $('menu-pe').textContent = pe;
+    desenharMenu();
+    $('menu').hidden = false;
+  }
+  function desenharMenu() {
+    const box = $('menu-itens');
+    box.innerHTML = '';
+    menuOpcoes.forEach((o, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.innerHTML = `<kbd>${i + 1}</kbd><span>${o.nome}</span><small>${o.desc}</small>`;
+      b.disabled = !o.pode();
+      b.addEventListener('click', () => escolherNoMenu(i + 1));
+      box.appendChild(b);
+    });
+  }
+  // só liga e desliga os botões (recriar a lista no meio de um clique perderia o clique)
+  function atualizarMenu() {
+    const bts = $('menu-itens').children;
+    menuOpcoes.forEach((o, i) => { if (bts[i]) bts[i].disabled = !o.pode(); });
+  }
+  function escolherNoMenu(n) {
+    const o = menuOpcoes[n - 1];
+    if (!o) return;
+    if (!o.pode()) { alerta('Ainda não dá'); return; }
+    o.fazer();
+    if (menuAberto) atualizarMenu();
+  }
+  function fecharMenu() { menuAberto = null; $('menu').hidden = true; }
+  function abrirMenuObras() {
+    abrirMenu('obras', 'Construir', OBRAS.map((d) => ({
+      nome: d.nome, desc: textoCusto(d.custo) + ' — ' + d.desc, pode: () => true, fazer: () => entrarNaObra(d),
+    })), 'Escolha com 1 a 5. Depois aponte com o herói e confirme com F. Esc sai.');
+  }
+
+  // ---------- o que dá para fazer aqui (tecla F) ----------
+  let interacao = null;
+  function procurarInteracao() {
+    if (obraFantasma) {
+      const d = obraFantasma.def;
+      return { tecla: 'F', texto: `erguer ${d.nome.toLowerCase()} (${textoCusto(d.custo)}) · Esc sai · vire o herói para mirar`, fazer: erguerObra };
+    }
+    const hx = heroi.pos.x, hz = heroi.pos.z;
+    if (LANFRANCO && dist2(hx, hz, LANFRANCO.x, LANFRANCO.z) < 4) return { tecla: 'F', texto: 'negociar com Lanfranco', fazer: abrirMercador };
+    if (dist2(hx, hz, PORTAL.x, PORTAL.z) < 7) {
+      if (JOGO.missao >= 10 || JOGO.fim) return { tecla: 'F', texto: 'entrar no tubo de lava (vai ao Teide)', fazer: irAoTeide };
+      return { tecla: '·', texto: 'O portal está trancado por dentro. Batidas fracas do outro lado.' };
+    }
+    if (dist2(hx, hz, SAIDA_TEIDE.x, SAIDA_TEIDE.z) < 7) return { tecla: 'F', texto: 'voltar pelo tubo de lava (vai à vila)', fazer: () => teleportar(PORTAL.x, PORTAL.z + 8, 0) };
+    if (dist2(hx, hz, CIRCULO.x, CIRCULO.z) < 8) {
+      if (JOGO.cristais > 0) return { tecla: 'F', texto: `devolver ${JOGO.cristais} pedra-sol ao círculo de ritual`, fazer: devolverCristais };
+      return { tecla: '·', texto: 'O círculo de ritual: aqui as pedras-sol voltam para o fogo' };
+    }
+    for (const info of CASAS_INFO) {
+      if (distCaixa(info.c.obst, hx, hz) > 2.2) continue;
+      if (info.estado === 'ruina') return { tecla: 'F', texto: `reerguer a casa (${textoCusto(custoCasa(info.c))})`, fazer: () => reerguer(info) };
+      if (info.estado === 'pronta' && info.vida < info.vidaMax) return { tecla: 'F', texto: `consertar a casa (${textoCusto(custoConserto(info.vida, info.vidaMax))})`, fazer: () => consertarCasa(info) };
+    }
+    for (const o of obras) {
+      if (o.vida < o.vidaMax && distCaixa(o.obst, hx, hz) < 2) return { tecla: 'F', texto: 'consertar: ' + o.def.nome.toLowerCase(), fazer: () => consertarObra(o) };
+    }
+    let perto = null, md = 1.8;
+    for (const r of RECURSOS) {
+      if (r.fim || Math.abs(r.x - hx) > 5 || Math.abs(r.z - hz) > 5) continue;
+      const d = dist2(r.x, r.z, hx, hz) - raioRecurso(r);
+      if (d < md) { md = d; perto = r; }
+    }
+    if (perto) return { tecla: 'Espaço', texto: perto.tipo === 'arvore' ? 'cortar a árvore' : 'quebrar a pedra' };
+    for (const it of cristaisChao) if (!it.pego && dist2(it.x, it.z, hx, hz) < 2.6) return { tecla: 'Espaço', texto: 'recolher a pedra-sol' };
+    return null;
+  }
+  function agir() { if (interacao && interacao.fazer) interacao.fazer(); }
+  function atualizarInteracao() {
+    interacao = JOGO.iniciado && !JOGO.pausado && JOGO.morto <= 0 ? procurarInteracao() : null;
+    const el = $('dica');
+    el.hidden = !interacao;
+    if (interacao) el.innerHTML = `<kbd>${interacao.tecla}</kbd>${interacao.texto}`;
+    if (menuAberto === 'mercador' && (!LANFRANCO || dist2(heroi.pos.x, heroi.pos.z, LANFRANCO.x, LANFRANCO.z) > 6)) fecharMenu();
+  }
+
+  // ---------- teclas do jogo ----------
+  function pausar(sim) {
+    JOGO.pausaTecla = sim;
+    JOGO.pausado = sim;
+    alerta(sim ? 'Pausa — aperte P para voltar' : '', sim ? 1e9 : 0.01);
+  }
+  function teclaDoJogo(e) {
+    const k = e.code;
+    if (e.repeat) return /^(KeyF|KeyB|KeyL|KeyP|KeyH|Enter|Escape|Digit|Numpad)/.test(k);
+    if (k === 'KeyH') { $('ajuda').classList.toggle('fechada'); return true; }
+    if (!JOGO.iniciado || !$('cartao').hidden) return k === 'Space';
+    if (k === 'KeyP') { pausar(!JOGO.pausaTecla); return true; }
+    if (JOGO.pausado) return true;
+    if (k === 'Escape') { fecharMenu(); sairDaObra(); return true; }
+    if (k === 'Enter' || k === 'NumpadEnter') { if (obraFantasma) erguerObra(); else pularFala(); return true; }
+    const num = /^(?:Digit|Numpad)([1-9])$/.exec(k);
+    if (num && menuAberto) { escolherNoMenu(+num[1]); return true; }
+    if (!podeAgir()) return k === 'Space';
+    if (k === 'KeyF') { if (obraFantasma) erguerObra(); else agir(); return true; }
+    if (k === 'KeyB') { if (menuAberto === 'obras' || obraFantasma) { fecharMenu(); sairDaObra(); } else abrirMenuObras(); return true; }
+    if (k === 'KeyL') { usarLuz(); return true; }
+    return false;
+  }
+
+  // ---------- missões (a história em capítulos) ----------
+  const MISSOES = [
+    { cap: 'Capítulo 1 · A chegada', texto: 'Corte 3 árvores para ter lenha', dica: 'Chegue perto de uma árvore e aperte Espaço.', valor: () => JOGO.cont.arvores, meta: 3,
+      inicio: [['Duarte', 'Lenha antes da noite. Depois, um teto.']] },
+    { cap: 'Capítulo 1 · A chegada', texto: 'Quebre 2 pedras', dica: 'As pedras soltas ficam pelos campos. Espaço perto delas.', valor: () => JOGO.cont.pedras, meta: 2,
+      inicio: [['Duarte', 'Agora pedra, para as paredes.']] },
+    { cap: 'Capítulo 1 · A chegada', texto: 'Reerga a primeira casa', dica: 'Chegue perto de uma ruína e aperte F. As menores custam menos.', valor: casasProntas, meta: 1, alvo: 'ruina',
+      inicio: [['Duarte', 'Doze casas queimadas há oitenta anos. Começo pela menor.']],
+      fim: [['Brites', 'Uma casa com teto! Sou Brites, pastora. Se tem teto, eu fico.'], ['Brites', 'O mercador Lanfranco espera na estrada oeste, perto da torre. Ele compra tudo.']] },
+    { cap: 'Capítulo 2 · Os Cinzentos', texto: 'Fale com Lanfranco na estrada oeste', dica: 'Siga o marcador dourado e aperte F perto dele.', valor: () => JOGO.cont.mercador, meta: 1, alvo: 'lanfranco' },
+    { cap: 'Capítulo 2 · Os Cinzentos', texto: 'Venda alguma coisa a Lanfranco', dica: 'Cada casa de pé também paga 1 de ouro a cada 20 s.', valor: () => JOGO.cont.vendas, meta: 1, alvo: 'lanfranco' },
+    { cap: 'Capítulo 2 · Os Cinzentos', texto: 'Construa uma torre de arqueiro', dica: 'Aperte B, escolha a torre (3) e confirme com F.', valor: () => JOGO.cont.torres, meta: 1,
+      inicio: [['Brites', 'À noite, os Cinzentos descem do Teide. Uma torre com arqueiro segura a vila.']] },
+    { cap: 'Capítulo 2 · Os Cinzentos', texto: 'Sobreviva à noite: defenda a vila', dica: 'Eles chegam ao entardecer, pelo oeste. Alguns roubam, outros queimam.', valor: () => JOGO.cont.noites, meta: 1,
+      aoComecar: () => { JOGO.ataques = true; },
+      fim: [['Brites', 'Assobiam como pastores... Os Cinzentos moram no paredão. Querem as pedras de volta.']] },
+    { cap: 'Capítulo 3 · Os cães do vulcão', texto: 'Ache uma pedra-sol', dica: 'Quebre pedras ou recolha os cristais na trilha das árvores secas, entre o arco e o portal.', valor: () => JOGO.cont.achados, meta: 1, alvo: 'cristal', cristal: true,
+      fim: [['Brites', 'Pedra-sol... Cada uma tirada da rocha apaga uma fogueira lá no paredão. Conte as luzes à noite.'], ['Brites', 'Venda e a vila cresce rápido. Guarde, e ela vira a Luz contra os diabos: tecla L.']] },
+    { cap: 'Capítulo 3 · Os cães do vulcão', texto: 'Reerga 4 casas', valor: casasProntas, meta: 4, alvo: 'ruina' },
+    { cap: 'Capítulo 3 · Os cães do vulcão', texto: 'Sobreviva a mais 2 ataques', dica: 'Agora os diabos também saem pelo portal, ao pé do Pico.', valor: () => JOGO.cont.noites, meta: 3,
+      inicio: [['Brites', 'Ouviu os uivos? Quando as fogueiras se apagam, os diabos saem pelo portal.']] },
+    { cap: 'Capítulo 4 · O Guardião', texto: 'Reerga 8 casas', dica: 'O portal agora abre: F nele leva pelo tubo de lava até o Teide.', valor: casasProntas, meta: 8, alvo: 'ruina',
+      inicio: [['Duarte', 'Se o portal é a porta deles, é por ali que eu passo.'], ['Brites', 'O tubo de lava vai até o Teide, ao acampamento dos Cinzentos. No círculo de pedra de lá, as pedras-sol voltam para o fogo.']] },
+    { cap: 'Capítulo 4 · O Guardião', texto: 'Erga 6 cercas ou muros', dica: 'B, depois 1 (cerca) ou 2 (muro).', valor: () => JOGO.cont.muros, meta: 6 },
+    { cap: 'Capítulo 4 · O Guardião', texto: 'O dia escuro: derrote o Guardião', dica: 'Ele saiu pelo portal e vem atrás de você. A Luz (L) o atrasa.', valor: () => (JOGO.guardiaoMorto ? 1 : 0), meta: 1, alvo: 'guardiao',
+      aoComecar: soltarGuardiao,
+      inicio: [['Brites', 'O céu ficou cinza... É ele. O Cavaleiro do portal!']],
+      fim: [['O Guardião', 'Eu também vendi.']], aoTerminar: () => setTimeout(mostrarFinal, 5500) },
+  ];
+  function iniciarMissao(i, silencioso) {
+    const m = MISSOES[i];
+    if (!m) return;
+    if (!silencioso) falar(m.inicio);
+    if (m.aoComecar) m.aoComecar();
+  }
+  function irParaMissao(i) { JOGO.missao = i; iniciarMissao(i); }
+  function verificarMissao() {
+    const m = MISSOES[JOGO.missao];
+    if (!m || m.valor() < m.meta) return;
+    falar(m.fim);
+    if (m.aoTerminar) m.aoTerminar();
+    JOGO.missao++;
+    alerta('Feito: ' + m.texto, 2.5);
+    iniciarMissao(JOGO.missao);
+    salvarLogo();
+  }
+  // marcador dourado em cima do alvo da missão
+  const marcador = new THREE.Mesh(new THREE.OctahedronGeometry(0.45), new THREE.MeshBasicMaterial({ color: 0xffcf5a, toneMapped: false }));
+  marcador.visible = false;
+  scene.add(marcador);
+  function alvoDaMissao() {
+    const m = MISSOES[JOGO.missao];
+    if (!m || !m.alvo) return null;
+    const hx = heroi.pos.x, hz = heroi.pos.z;
+    if (m.alvo === 'lanfranco' && LANFRANCO) return [LANFRANCO.x, 3, LANFRANCO.z];
+    if (m.alvo === 'ruina') {
+      let melhor = null, md = Infinity;
+      for (const c of CASAS_INFO) {
+        if (c.estado !== 'ruina') continue;
+        const d = dist2(c.c.x, c.c.z, hx, hz) + (custoCasa(c.c).madeira > JOGO.madeira ? 40 : 0);
+        if (d < md) { md = d; melhor = [c.c.x, 6, c.c.z]; }
+      }
+      return melhor;
+    }
+    if (m.alvo === 'cristal') {
+      const it = cristaisChao.find((c) => !c.pego);
+      return it ? [it.x, (it.modelo ? it.modelo.position.y : 0) + 2.2, it.z] : null;
+    }
+    if (m.alvo === 'guardiao') {
+      const g = inimigos.find((e) => e.tipo === 'guardiao' && !e.morto && e.estado !== 'estatua');
+      return g ? [g.pos.x, g.pos.y + 6.2, g.pos.z] : null;
+    }
+    return null;
+  }
+
+  // ---------- painel, mapinha ----------
+  function atualizarPainel() {
+    $('r-madeira').textContent = JOGO.madeira;
+    $('r-pedra').textContent = JOGO.pedra;
+    $('r-ouro').textContent = JOGO.ouro;
+    $('r-cristais').textContent = JOGO.cristais;
+    $('vida-barra').style.width = (JOGO.vida / JOGO.vidaMax * 100) + '%';
+    const n = inimigos.filter((e) => e.onda && !e.morto).length;
+    $('dia').textContent = `Dia ${JOGO.dia} · ${nomeDaHora(JOGO.hora)}` + (n ? ` · ${n} inimigo${n > 1 ? 's' : ''} na vila` : '') + (JOGO.luz > 0 ? ` · Luz em ${Math.ceil(JOGO.luz)} s` : '');
+    const m = MISSOES[JOGO.missao];
+    $('obj-cap').textContent = m ? m.cap : JOGO.fim ? 'Depois do fim' : 'Jogo livre';
+    const v = m ? Math.min(m.valor(), m.meta) : 0;
+    $('obj-texto').innerHTML = m
+      ? `${m.texto}${m.meta > 1 ? ` <b>(${v}/${m.meta})</b>` : ''}${m.dica ? `<br><span style="color:var(--texto-suave);font-size:12px">${m.dica}</span>` : ''}`
+      : 'Defenda a vila, reerga as casas e erga o que quiser. Os ataques continuam toda noite.';
+    if (fogueiras) fogueiras.geometry.setDrawRange(0, fogueirasAcesas());
+  }
+  const ctxMapa = $('mapinha').getContext('2d');
+  function desenharMapinha() {
+    const W = 340, S = W / 320, cx = heroi.pos.x, cz = heroi.pos.z;
+    const P = (x, z) => [W / 2 + (x - cx) * S, W / 2 + (z - cz) * S];   // norte (−z) para cima
+    const g = ctxMapa;
+    g.clearRect(0, 0, W, W);
+    g.fillStyle = cz < -450 ? 'rgba(52,44,38,0.92)' : 'rgba(38,46,30,0.92)';
+    g.fillRect(0, 0, W, W);
+    // Pico e Ponte
+    g.fillStyle = 'rgba(120,118,112,0.6)';
+    let [a, b] = P(-118, -330);
+    g.fillRect(a, b, 236 * S, 212 * S);
+    [a, b] = P(205, -15);
+    g.beginPath(); g.arc(a, b, 60 * S, 0, Math.PI * 2); g.fill();
+    // estradas
+    g.strokeStyle = 'rgba(190,170,130,0.55)';
+    g.lineWidth = 3;
+    g.beginPath();
+    [a, b] = P(-120, 0); g.moveTo(a, b); [a, b] = P(120, 0); g.lineTo(a, b);
+    [a, b] = P(0, -84); g.moveTo(a, b); [a, b] = P(0, 120); g.lineTo(a, b);
+    g.stroke();
+    // árvores e pedras perto
+    for (const r of RECURSOS) {
+      if (r.fim || Math.abs(r.x - cx) > 170 || Math.abs(r.z - cz) > 170) continue;
+      [a, b] = P(r.x, r.z);
+      g.fillStyle = r.tipo === 'arvore' ? 'rgba(90,150,70,0.85)' : 'rgba(170,170,170,0.85)';
+      g.fillRect(a - 1.5, b - 1.5, 3, 3);
+    }
+    // casas
+    for (const info of CASAS_INFO) {
+      const c = info.c;
+      [a, b] = P(c.x, c.z);
+      g.save(); g.translate(a, b); g.rotate(-c.rot);
+      g.fillStyle = info.estado === 'pronta' ? '#c98a4a' : 'rgba(110,100,92,0.9)';
+      g.fillRect(-c.w * S, -c.d * S, c.w * 2 * S, c.d * 2 * S);
+      g.restore();
+    }
+    for (const o of obras) {
+      [a, b] = P(o.x, o.z);
+      g.fillStyle = o.def.id === 'torre' ? '#e8d8b0' : o.def.renda ? '#f0a0b0' : '#b9a68a';
+      g.save(); g.translate(a, b); g.rotate(-o.rot);
+      g.fillRect(-Math.max(1.5, o.def.caixa[0] * S), -1.5, Math.max(3, o.def.caixa[0] * 2 * S), 3);
+      g.restore();
+    }
+    const ponto = (x, z, cor, r) => { [a, b] = P(x, z); g.fillStyle = cor; g.beginPath(); g.arc(a, b, r, 0, Math.PI * 2); g.fill(); };
+    for (const it of cristaisChao) if (!it.pego) ponto(it.x, it.z, '#ff9a40', 3);
+    ponto(PORTAL.x, PORTAL.z - 4, '#a070e0', 4);
+    if (LANFRANCO) ponto(LANFRANCO.x, LANFRANCO.z, '#6aa8ff', 4);
+    const alvo = alvoDaMissao();
+    if (alvo) ponto(alvo[0], alvo[2], '#ffcf5a', 5);
+    for (const e of inimigos) if (!e.morto && e.estado !== 'estatua') ponto(e.pos.x, e.pos.z, e.tipo === 'guardiao' ? '#ff3020' : '#e85a4a', e.tipo === 'guardiao' ? 6 : 3.5);
+    // o herói, apontando para onde olha
+    g.save(); g.translate(W / 2, W / 2); g.rotate(-heroi.ang + Math.PI);
+    g.fillStyle = '#ffe070'; g.strokeStyle = '#1b1a17'; g.lineWidth = 1.5;
+    g.beginPath(); g.moveTo(0, -9); g.lineTo(6, 7); g.lineTo(-6, 7); g.closePath(); g.fill(); g.stroke();
+    g.restore();
+  }
+
+  // ---------- jogo salvo (no navegador) ----------
+  const CHAVE_SALVO = 'cavaleiro-do-teide-salvo';
+  let querSalvar = false;
+  const salvarLogo = () => { querSalvar = true; };
+  function salvar() {
+    if (!JOGO.iniciado) return;
+    querSalvar = false;
+    const j = JOGO;
+    gravarLocal(CHAVE_SALVO, JSON.stringify({
+      v: 1, rec: [j.madeira, j.pedra, j.ouro, j.cristais, j.vendidos, j.devolvidos], dia: j.dia, hora: +j.hora.toFixed(4), missao: j.missao,
+      ataques: j.ataques, onda: j.onda, cont: j.cont, fim: j.fim, guardiaoMorto: j.guardiaoMorto, foiAoTeide: !!j.foiAoTeide,
+      casas: CASAS_INFO.map((c) => (c.estado === 'ruina' ? 0 : 1)),
+      obras: obras.map((o) => [o.def.id, +o.x.toFixed(2), +o.z.toFixed(2), +o.rot.toFixed(3)]),
+      cortados: [...cortados], pegos: [...pegos], heroi: [+heroi.pos.x.toFixed(1), +heroi.pos.z.toFixed(1), +heroi.ang.toFixed(2)],
+    }));
+  }
+  function lerSalvo() {
+    try { const s = JSON.parse(lerLocal(CHAVE_SALVO) || 'null'); return s && s.v === 1 ? s : null; } catch (e) { return null; }
+  }
+  function aplicarSalvo(s) {
+    [JOGO.madeira, JOGO.pedra, JOGO.ouro, JOGO.cristais, JOGO.vendidos, JOGO.devolvidos] = s.rec;
+    Object.assign(JOGO, { dia: s.dia, hora: s.hora, missao: s.missao, ataques: s.ataques, onda: s.onda, fim: s.fim, guardiaoMorto: s.guardiaoMorto, foiAoTeide: s.foiAoTeide, noiteFeita: s.dia });
+    Object.assign(JOGO.cont, s.cont);
+    s.casas.forEach((v, i) => { if (v && CASAS_INFO[i]) pintarCasa(CASAS_INFO[i], 'pronta'); });
+    for (const [id, x, z, rot] of s.obras) { const d = OBRAS.find((o) => o.id === id); if (d) criarObra(d, x, z, rot, true); }
+    const corte = new Set(s.cortados);
+    for (const r of RECURSOS) if (corte.has(chaveRec(r))) { r.fim = true; tirarObstaculo(r.obst); cortados.add(chaveRec(r)); poseRecurso(r, EIXO_Y, 0, 0, 0); }
+    const pg = new Set(s.pegos);
+    for (const it of cristaisChao) if (pg.has(Math.round(it.x) + ',' + Math.round(it.z))) { it.pego = true; pegos.add(Math.round(it.x) + ',' + Math.round(it.z)); tirarObstaculo(it.obst); if (it.modelo) it.modelo.visible = false; }
+    if (JOGO.guardiaoMorto) for (const e of [...inimigos]) if (e.tipo === 'guardiao') tirarInimigo(e);
+    if (s.heroi) teleportar(s.heroi[0], s.heroi[1], s.heroi[2]);
+  }
+
+  // ---------- abertura e finais ----------
+  function mostrarCartao(titulo, paragrafos, botoes) {
+    $('cartao-titulo').textContent = titulo;
+    const t = $('cartao-texto');
+    t.innerHTML = paragrafos.map((p) => `<p${p.startsWith('§') ? ' class="teclas"' : ''}>${p.replace(/^§/, '')}</p>`).join('');
+    const b = $('cartao-botoes');
+    b.innerHTML = '';
+    for (const bt of botoes) {
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.textContent = bt.texto;
+      if (bt.principal) el.className = 'principal';
+      if (bt.id) el.id = bt.id;
+      el.addEventListener('click', bt.fazer);
+      b.appendChild(el);
+    }
+    $('cartao').hidden = false;
+    JOGO.pausado = true;
+  }
+  const TECLAS_TEXTO = '§<b>W A S D</b> andar · <b>Shift</b> correr · <b>Espaço</b> golpe (luta, corta, quebra) · <b>F</b> agir · <b>B</b> construir · <b>L</b> a Luz · arraste o mouse (ou <b>Q E R V</b>) para girar e olhar até o céu · <b>H</b> comandos · <b>P</b> pausa';
+  function mostrarAbertura() {
+    const salvo = lerSalvo();
+    const botoes = salvo
+      ? [{ texto: 'Continuar', principal: true, id: 'bt-comecar', fazer: () => comecarJogo(true) }, { texto: 'Começar de novo', fazer: recomecar }]
+      : [{ texto: 'Começar', principal: true, id: 'bt-comecar', fazer: () => comecarJogo(false) }];
+    mostrarCartao('Cavaleiro do Teide', [
+      'Tenerife, 1497. Duarte, patrulheiro português, recebeu a posse de um vale ao pé do Teide: uma vila abandonada há oitenta anos, um portal soterrado no pé do paredão e, lá no alto, luzes que ninguém explica.',
+      'O mercador Lanfranco pagou a viagem e quer o retorno. Corte árvores, quebre pedras, reerga as casas e defenda a vila dos Cinzentos, que descem do Teide à noite. E descubra o que dorme dentro do vulcão.',
+      TECLAS_TEXTO,
+    ], botoes);
+    atualizarAbertura();
+  }
+  function atualizarAbertura() {
+    const b = $('bt-comecar');
+    if (!b || $('cartao').hidden) return;
+    b.disabled = !jogoPronto;
+    if (!jogoPronto) b.textContent = 'Preparando o mundo…';
+    else if (b.textContent === 'Preparando o mundo…') b.textContent = lerSalvo() ? 'Continuar' : 'Começar';
+  }
+  function recomecar() {
+    if (!window.confirm('Apagar o jogo salvo e começar do zero?')) return;
+    gravarLocal(CHAVE_SALVO, '');
+    location.reload();
+  }
+  function comecarJogo(continuar) {
+    if (!jogoPronto) return;
+    $('cartao').hidden = true;
+    const s = continuar ? lerSalvo() : null;
+    if (s) aplicarSalvo(s);
+    JOGO.iniciado = true;
+    JOGO.pausado = false;
+    $('objetivo').hidden = false;
+    if (s) {
+      iniciarMissao(JOGO.missao, true);
+      alerta('Dia ' + JOGO.dia, 2);
+    } else {
+      falar([['Duarte', 'Tenerife. Uma carta de posse, um vale vazio e um vulcão.']]);
+      iniciarMissao(0);
+    }
+    atualizarPainel();
+    salvar();
+  }
+  const FINAIS = {
+    fogueiras: ['Final: As Mil Fogueiras', 'Na noite da erupção, a vila inteira acende fogueiras para Guayota achar que ainda está no inferno, e os muros guiam a lava para longe das casas. Ao amanhecer, o Guardião entrega a espada a Duarte: "Agora o cavaleiro é você." Depois sai para encarar o sol. A lava fria vira terra nova, dividida com os Cinzentos.'],
+    ouro: ['Final: Ouro', 'Lanfranco enche o navio e ainda arranja para Duarte um título de Cavaleiro, comprado. A lava desce sem rumo; a vila sobrevive, rica e sozinha, ao pé de um vulcão acordado.'],
+    cinza: ['Final: Cinza', 'Duarte guarda as pedras-sol e mantém as fogueiras acesas. Guayota dorme, e a vila fica pequena e em paz. Anos depois, já velho, ele ainda risca a parede da torre: 40, 40, 40.'],
+  };
+  function mostrarFinal() {
+    const id = JOGO.devolvidos >= 3 ? 'fogueiras' : JOGO.vendidos >= 3 && JOGO.vendidos > JOGO.devolvidos ? 'ouro' : 'cinza';
+    JOGO.fim = id;
+    salvar();
+    const [titulo, texto] = FINAIS[id];
+    const outros = id === 'fogueiras' ? '' : 'Há outros finais: devolva pelo menos 3 pedras-sol ao círculo de ritual no Teide para o final verdadeiro.';
+    mostrarCartao(titulo, [texto, `Pedras-sol vendidas: ${JOGO.vendidos} · devolvidas ao fogo: ${JOGO.devolvidos}. ${outros}`], [
+      { texto: 'Continuar jogando', principal: true, fazer: () => { $('cartao').hidden = true; JOGO.pausado = false; } },
+      { texto: 'Começar de novo', fazer: recomecar },
+    ]);
+  }
+
+  // ---------- montagem (quando tudo carregou) e o passo de cada quadro ----------
+  function montarJogo() {
+    jogoPronto = true;
+    cristaisChao = ITENS_VILA.filter((it) => it.arq === 'cristal-sol' && it.z > -400 && it.modelo);
+    montarLanfranco();
+    montarAcampamento();
+    montarFogueiras();
+    atualizarAbertura();
+  }
+  let tLento = 0, tSalvar = 0, tRenda = 0;
+  function atualizarJogo(dt, real) {
+    if (!jogoPronto) {
+      if (extrasProntos && heroi.modelo && TEIDE.alturas) montarJogo();
+      return;
+    }
+    atualizarCeu(dt);
+    atualizarTextos(real);
+    if (!$('cartao').hidden) atualizarAbertura();
+    if (JOGO.pausado) return;
+    // o tempo passa; ao entardecer vem o ataque da noite
+    const antes = JOGO.hora;
+    JOGO.hora += dt / DIA_SEG;
+    if (JOGO.hora >= 1) { JOGO.hora -= 1; JOGO.dia++; alerta('Dia ' + JOGO.dia, 2); }
+    if (antes < 0.62 && JOGO.hora >= 0.62 && JOGO.ataques && !JOGO.ondaAtiva && JOGO.noiteFeita !== JOGO.dia) { JOGO.noiteFeita = JOGO.dia; lancarOnda(); }
+    // vida: volta devagar depois de 6 s sem apanhar; caído, levanta na praça
+    JOGO.semDano += dt;
+    if (JOGO.semDano > 6 && JOGO.vida < JOGO.vidaMax && JOGO.morto <= 0) JOGO.vida = Math.min(JOGO.vidaMax, JOGO.vida + 4 * dt);
+    if (JOGO.invulneravel > 0) JOGO.invulneravel -= dt;
+    if (JOGO.morto > 0) { JOGO.morto -= dt; if (JOGO.morto <= 0) heroiLevanta(); }
+    if (JOGO.luz > 0) JOGO.luz -= dt;
+    // aluguel: cada casa de pé rende 1 de ouro a cada 20 s
+    tRenda += dt;
+    if (tRenda >= 20) { tRenda = 0; const n = casasProntas(); if (n) { JOGO.ouro += n; flutuar('+' + n + ' ouro (aluguel)', heroi.pos.x, heroi.pos.y + 2.4, heroi.pos.z, COR_TEXTO.ouro); } }
+    atualizarOndas(dt);
+    for (let i = inimigos.length - 1; i >= 0; i--) if (inimigos[i]) atualizarInimigo(inimigos[i], dt);
+    separarInimigos();
+    atualizarObras(dt);
+    atualizarFlechas(dt);
+    animarRecursos(dt);
+    animarCasas(dt);
+    animarLuz(dt);
+    atualizarFalas(dt);
+    if (obraFantasma) atualizarFantasma();
+    if (LANFRANCO) LANFRANCO.mixer.update(dt);
+    // marcador da missão
+    const alvo = alvoDaMissao();
+    marcador.visible = !!alvo;
+    if (alvo) { marcador.position.set(alvo[0], alturaMundo(alvo[0], alvo[2]) + alvo[1] + Math.sin(performance.now() / 300) * 0.25, alvo[2]); marcador.rotation.y += dt * 2; }
+    // 5 vezes por segundo: painel, o que dá para fazer, mapinha, missão
+    tLento += dt;
+    if (tLento > 0.2) {
+      tLento = 0;
+      atualizarPainel();
+      atualizarInteracao();
+      desenharMapinha();
+      verificarMissao();
+      if (menuAberto) atualizarMenu();
+    }
+    tSalvar += dt;
+    if ((querSalvar && tSalvar > 2) || tSalvar > 20) { tSalvar = 0; salvar(); }
+  }
+
   // ---------- laço ----------
   const elInfo = $('info');
   let ultimo = 0, quadros = 0, tFps = 0, fps = 0, tAjuste = 0, quadrosAjuste = 0, lentos = 0;
@@ -1221,6 +2834,7 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
     const dt = Math.min(0.05, real);
     ultimo = agora;
     moverHeroi(dt);
+    atualizarJogo(dt, real);
     atualizarCamera(dt);
     quadros++; tFps += real;
     if (tFps >= 0.5) {
@@ -1280,8 +2894,13 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
     redimensionar();
     ultimo = performance.now();
     requestAnimationFrame(quadro);
+    mostrarAbertura();
   })();
-  window.__reino = { heroi, cam, get alturaEm() { return alturaEm; }, obstaculos, MAPA, RECURSOS, get extrasProntos() { return extrasProntos; }, renderer, RESOLUCAO };
+  window.__reino = { heroi, cam, get alturaEm() { return alturaEm; }, obstaculos, MAPA, RECURSOS, get extrasProntos() { return extrasProntos; }, renderer, RESOLUCAO,
+    JOGO, inimigos, CASAS_INFO, obras, lancarOnda, comecarJogo, missaoAtual: () => MISSOES[JOGO.missao], pularMissao: (n) => irParaMissao(n), get jogoPronto() { return jogoPronto; },
+    // para os testes: adianta o jogo sem desenhar (passos de 0,05 s)
+    simular: (seg) => { for (let t = 0; t < seg; t += 0.05) { moverHeroi(0.05); atualizarJogo(0.05, 0.05); } atualizarCamera(1); },
+    teleportar, ferirInimigo };
 
   // No GitHub Pages o jogo pode ser instalado no PC pelo Chrome (botão "Instalar" na barra de endereço) e abre sem
   // internet depois da primeira vez. Dentro do link de teste do Claude (que roda num quadro) isso não se aplica.

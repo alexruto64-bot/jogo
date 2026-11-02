@@ -24,6 +24,12 @@
   Itens parados ficam em `ITENS_VILA`, personagens e bichos animados em `ANIMADOS`.
 - Desempenho: botão "Gráficos" (automático, leve, alto), resolução que se ajusta ao FPS e aviso quando o Chrome está
   sem aceleração gráfica. O jogo pode ser instalado pelo Chrome (`manifest.webmanifest` e `sw.js`).
-- `TURBO = 10` no `index.html` é temporário (herói 10x mais rápido para conferir os mapas).
+- A história virou o jogo (seção "O JOGO" do `index.html`): recursos, casas em ruína que se reerguem, obras (tecla B),
+  o mercador, dia e noite, ondas de inimigos, missões por capítulo (`MISSOES`), finais e jogo salvo no navegador.
+  Velocidade normal; `?turbo=10` no endereço deixa o herói 10x mais rápido para conferir o mapa.
+- Para testar sem tela, `window.__reino.simular(segundos)` adianta o jogo sem desenhar (o Chrome sem placa de vídeo
+  roda a 1 quadro por segundo).
+- No three r147, um material repartido entre InstancedMesh com e sem cor por cópia desenha a sem cor de preto: ou
+  todas as cópias de um material têm `setColorAt`, ou nenhuma.
 - No link de teste do Claude (Artifact), arquivos `.glb` não são servidos: a cópia para lá troca `SUFIXO_GLB` por
   `'.txt'` e grava os `.glb` em base64 (em partes, se passarem de 15 milhões de caracteres).

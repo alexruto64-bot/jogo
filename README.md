@@ -3,11 +3,36 @@
 Jogo de ação para o navegador, em 3D, com visão de cima: um cavaleiro defende território.
 
 **Jogar:** https://alexruto64-bot.github.io/jogo/ (GitHub Pages, publicado a partir da `main`).
-Por enquanto é a base: o herói animado andando pelo mapa, sem inimigos.
 
 A história (duas propostas, com a recomendada e a comparação) está em [HISTORIA.md](HISTORIA.md).
 
-> **Temporário:** o herói está 10x mais rápido para conferir os mapas (`TURBO = 10` no `index.html`). Voltar para 1 depois.
+Para conferir o mapa depressa, abra com `?turbo=10` no endereço (herói 10x mais rápido).
+
+## Como se joga
+
+A história recomendada (*Cavaleiro do Teide*) virou o jogo. Duarte chega a um vale com 12 casas em ruína (paredes
+queimadas, sem telhado) e reergue a vila aos poucos:
+
+- **Recursos:** o golpe de espada corta árvore (3 golpes, madeira) e quebra pedra (4 golpes, pedra); às vezes a rocha
+  esconde uma **pedra-sol**. Cada casa de pé paga 1 de ouro a cada 20 s; porcos e galinhas também rendem ouro.
+- **Construir:** `F` perto de uma ruína a reergue (a casa sobe peça por peça); `B` abre as obras: cerca, muro de
+  pedra, torre de arqueiro (atira sozinha), porco e galinha. Casas e obras danificadas se consertam com `F`.
+- **Mercador:** Lanfranco, na estrada oeste, compra madeira, pedra e pedra-sol.
+- **Dia e noite:** um dia dura 6 minutos. A partir do capítulo 2, todo entardecer vem um ataque: os **Cinzentos**
+  (gente de rosto pintado de cinza) descem do Teide pelo oeste e pelo sul, e os **diabretes** e **porcos-goblin** saem
+  pelo portal ao pé do Pico; depois vem o **orc**. Uns roubam a praça (dá para pegar de volta matando o ladrão antes
+  que fuja), outros queimam casas (que voltam a ser ruína) e derrubam cercas e muros.
+- **Luta:** os inimigos perseguem Duarte quando ele chega perto ou bate neles; cada um tem barra de vida. Duarte tem
+  vida (volta sozinha depois de alguns segundos sem apanhar); se cair, acorda na praça e perde parte da madeira e da pedra.
+- **A pedra-sol:** vender rende muito ouro, mas cada uma vendida apaga fogueiras no paredão (os pontos de fogo no Pico,
+  de noite) e traz mais diabos. Guardada, vira **a Luz** (`L`): os inimigos perto apanham e ficam tontos.
+- **Capítulos:** 1 · A chegada (lenha, pedra, a primeira casa); 2 · Os Cinzentos (mercador, torre, a primeira noite);
+  3 · Os cães do vulcão (a pedra-sol, 4 casas, mais ataques); 4 · O Guardião (8 casas, muros e o dia escuro, quando o
+  Guardião sai pelo portal). No capítulo 4 o portal abre um tubo de lava até o acampamento dos vilões no Teide, onde o
+  círculo de ritual recebe as pedras-sol de volta.
+- **Finais:** *Mil Fogueiras* (devolver ao menos 3 pedras-sol ao círculo), *Ouro* (vender 3 ou mais) ou *Cinza*. Depois
+  do final dá para continuar jogando.
+- O jogo é salvo sozinho no navegador; na abertura aparecem **Continuar** e **Começar de novo**.
 
 ## O mundo
 
@@ -37,16 +62,20 @@ Tentação, Columbia River Gorge, Encosta na floresta, o levantamento de 6 km co
 
 ## Comandos
 
-| Comando                     | O que faz                                        |
-| --------------------------- | ------------------------------------------------ |
-| W A S D (ou setas)          | Andar                                            |
-| Shift                       | Correr                                           |
-| Espaço                      | Golpe de espada                                  |
-| Touchpad: dois dedos ← →    | Girar a câmera                                   |
-| Touchpad: dois dedos ↑ ↓    | Aproximar / afastar (a rodinha do mouse também)  |
-| Touchpad: pinça             | Aproximar / afastar                              |
-| Clicar e arrastar           | Girar e inclinar a câmera                        |
-| Q E / Z X                   | Girar / aproximar pelo teclado                   |
+| Comando                       | O que faz                                                        |
+| ----------------------------- | ---------------------------------------------------------------- |
+| W A S D (ou setas)            | Andar                                                            |
+| Shift                         | Correr                                                           |
+| Espaço                        | Golpe: luta, corta árvore, quebra pedra, recolhe pedra-sol       |
+| F                             | Agir: reerguer, consertar, negociar, tubo de lava, devolver      |
+| B                             | Construir (1 a 5 escolhe, F confirma, Esc sai)                   |
+| L                             | A Luz (precisa de pedra-sol guardada)                            |
+| P / H                         | Pausa / mostrar os comandos                                      |
+| Clicar e arrastar             | Girar e inclinar a câmera (até olhar o céu)                      |
+| Q E / R V / Z X               | Girar / inclinar / aproximar pelo teclado                        |
+| Touchpad: dois dedos          | Para os lados gira; para cima e para baixo aproxima              |
+| Touchpad: Shift + dois dedos  | Inclina a câmera                                                 |
+| Touchpad: pinça               | Aproximar / afastar                                              |
 
 ## Desempenho e instalação
 
