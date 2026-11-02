@@ -272,7 +272,7 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
   // Herói (Quaternius, CC0): corpo e roupa em metros (1,87 m com o capuz) e as animações num arquivo à parte,
   // no mesmo esqueleto. passoAndar/passoCorrer: velocidade em que o pé apoiado desliza em cada animação (m/s),
   // usada para o passo acompanhar o deslocamento sem o pé escorregar.
-  const HEROI = { escala: 1, andar: 1.5, correr: 5.2, passoAndar: 0.98, passoCorrer: 5.9 };
+  const HEROI = { escala: 1, andar: 2.25, correr: 7.8, passoAndar: 0.98, passoCorrer: 5.9 };
   // Velocidade normal. Para conferir o mapa depressa, abra o jogo com ?turbo=10 no endereço (herói 10x mais rápido).
   const TURBO = clamp(Number(new URLSearchParams(location.search).get('turbo')) || 1, 1, 20);
   const ANIM = { parado: 'Idle_Loop', guarda: 'Sword_Idle', andar: 'Walk_Loop', correr: 'Jog_Fwd_Loop', golpe: 'Sword_Attack', ferido: 'Hit_Chest', morte: 'Death01', magia: 'Spell_Simple_Shoot', agir: 'Interact' };
@@ -335,7 +335,7 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
       corTopo: { value: new THREE.Color(0x3d7bbf) }, corHorizonte: { value: COR_HORIZONTE.clone() }, corBaixo: { value: new THREE.Color(0xb9c6d2) },
       solDir: { value: SOL_DIR.clone() }, corSol: { value: new THREE.Color(1.0, 0.93, 0.78) },
       fotoDia: { value: null }, fotoNoite: { value: null }, temDia: { value: 0 }, temNoite: { value: 0 }, noite: { value: 0 },
-      tomDia: { value: new THREE.Color(1, 1, 1) }, tomNoite: { value: new THREE.Color(0.38, 0.41, 0.52) },
+      tomDia: { value: new THREE.Color(1, 1, 1) }, tomNoite: { value: new THREE.Color(0.46, 0.5, 0.62) },
       giro: { value: SOL_AZ - (0.5952 - 0.5) * 2 * Math.PI }, elMin: { value: CEU_EL_MIN },
     },
     vertexShader: 'varying vec3 vDir; void main(){ vDir = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
@@ -624,10 +624,11 @@ void main(){
   // do Teide é avermelhada, e pedra quebrada nas encostas e em manchas. O relevo fino das três entra na luz.
   async function materialChaoMundo() {
     const nomes = ['vila/grama.jpg', 'vila/terra.jpg', 'terreno/textura.jpg', 'terreno/cascalho.jpg', 'terreno/cinza.jpg',
-      'terreno/entulho.jpg', 'terreno/cascalho_normal.jpg', 'terreno/cinza_normal.jpg', 'terreno/entulho_normal.jpg'];
-    const [grama, terra, fotoTeide, cascalho, cinza, entulho, relCascalho, relCinza, relEntulho] = await Promise.all(nomes.map(carregarTextura));
+      'terreno/entulho.jpg', 'terreno/cascalho_normal.jpg', 'terreno/cinza_normal.jpg', 'terreno/entulho_normal.jpg',
+      'vila/grama-floresta.jpg', 'vila/grama_normal.jpg', 'vila/grama-floresta_normal.jpg'];
+    const [grama, terra, fotoTeide, cascalho, cinza, entulho, relCascalho, relCinza, relEntulho, gramaF, relGrama, relGramaF] = await Promise.all(nomes.map(carregarTextura));
     const aniso = renderer.capabilities.getMaxAnisotropy();
-    for (const t of [grama, terra, cascalho, cinza, entulho, relCascalho, relCinza, relEntulho]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = aniso; }
+    for (const t of [grama, terra, cascalho, cinza, entulho, relCascalho, relCinza, relEntulho, gramaF, relGrama, relGramaF]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = aniso; }
     fotoTeide.anisotropy = aniso;
     const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95, metalness: 0, envMapIntensity: 0.35, normalMap: relCascalho, normalScale: new THREE.Vector2(1.2, 1.2) });
     mat.onBeforeCompile = (sh) => {
@@ -635,6 +636,7 @@ void main(){
         grama: { value: grama }, terra: { value: terra }, fotoTeide: { value: fotoTeide },
         cascalho: { value: cascalho }, cinza: { value: cinza }, entulho: { value: entulho },
         relCascalho: { value: relCascalho }, relCinza: { value: relCinza }, relEntulho: { value: relEntulho },
+        gramaF: { value: gramaF }, relGrama: { value: relGrama }, relGramaF: { value: relGramaF },
         teide: { value: new THREE.Vector4(TEIDE.cx, TEIDE.cz, TEIDE.lado, 0) },
       });
       sh.vertexShader = sh.vertexShader
@@ -644,7 +646,7 @@ void main(){
         .replace('#include <common>', `#include <common>
 varying vec3 vMundo;
 varying vec3 vNormalMundo;
-uniform sampler2D grama, terra, fotoTeide, cascalho, cinza, entulho, relCascalho, relCinza, relEntulho;
+uniform sampler2D grama, terra, fotoTeide, cascalho, cinza, entulho, relCascalho, relCinza, relEntulho, gramaF, relGrama, relGramaF;
 uniform vec4 teide;
 vec3 lin(vec3 c) { return pow(c, vec3(2.2)); }
 const mat2 GIRO = mat2(0.8, -0.6, 0.6, 0.8);
@@ -652,15 +654,23 @@ const mat2 GIRO = mat2(0.8, -0.6, 0.6, 0.8);
 vec3 duas(sampler2D t, vec2 p, float esc) { return mix(lin(texture2D(t, p / esc).rgb), lin(texture2D(t, GIRO * p / (esc * 3.7) + 0.31).rgb), 0.35); }
 float gTeide;
 float gVermelho;
-float gEntulho;`)
+float gEntulho;
+float gTipo;
+float gTerra;`)
         .replace('#include <map_fragment>', `#include <map_fragment>
 {
   vec2 p = vMundo.xz;
   gTeide = 1.0 - smoothstep(${TEIDE_PLENO.toFixed(1)}, ${TEIDE_INICIO.toFixed(1)}, p.y);
   vec3 cor = vec3(1.0);
   if (gTeide < 0.999) {
-    vec3 g = mix(lin(texture2D(grama, p / 3.2).rgb), lin(texture2D(grama, p / 13.0 + 0.31).rgb), 0.4);
-    g *= vec3(0.6, 0.74, 0.42);
+    // duas gramas do Poly Haven no tamanho real (2 m): a de floresta (verde, com gravetos) e a de folhas, trocando em
+    // manchas grandes; uma variação bem larga de tom tira o ar de chão repetido
+    float nG = sin(p.x * 0.047 + sin(p.y * 0.031) * 2.3) * sin(p.y * 0.053 - 0.8) * 0.5 + 0.5;
+    gTipo = smoothstep(0.3, 0.75, nG) * 0.65;
+    vec3 g = mix(duas(gramaF, p, 2.0), duas(grama, p, 2.0), gTipo);
+    float tomLargo = sin(p.x * 0.013 + 1.0) * sin(p.y * 0.017 + 0.4) * 0.5 + 0.5;
+    g *= vec3(0.44, 0.62, 0.28) * (0.86 + 0.28 * tomLargo);
+    g = mix(g, vec3(0.13, 0.155, 0.034), smoothstep(120.0, 700.0, length(vViewPosition)) * 0.5);
     vec3 t = lin(texture2D(terra, p / 3.0).rgb);
     float n = sin(p.x * 0.23 + sin(p.y * 0.17) * 2.0) * sin(p.y * 0.19 + 1.3) * 0.5 + 0.5;
     float n2 = sin(p.x * 0.61 + 0.7) * sin(p.y * 0.53 - 0.4) * 0.5 + 0.5;
@@ -668,7 +678,8 @@ float gEntulho;`)
     float eixo = min(abs(p.x), abs(p.y));
     float estrada = smoothstep(4.0, 2.2, eixo) * step(15.0, max(abs(p.x), abs(p.y)));
     float volta = smoothstep(4.0, 1.0, abs(max(abs(p.x), abs(p.y)) - 15.5));
-    cor = mix(g, t, clamp(max(max(manchas, estrada), volta * 0.8), 0.0, 1.0));
+    gTerra = clamp(max(max(manchas, estrada), volta * 0.8), 0.0, 1.0);
+    cor = mix(g, t, gTerra);
   }
   if (gTeide > 0.001) {
     vec3 macro = lin(texture2D(fotoTeide, (p - teide.xy) / teide.z + 0.5).rgb);
@@ -687,13 +698,21 @@ float gEntulho;`)
 }`)
         .replace('#include <normal_fragment_maps>', `
 #ifdef TANGENTSPACE_NORMALMAP
-if (gTeide > 0.001) {
+{
+  // o relevo fino: das gramas no vale (a terra fica lisa) e das três fotos de chão no Teide
   vec2 p = vMundo.xz;
-  float perto = smoothstep(400.0, 30.0, length(vViewPosition)) * gTeide;
-  vec3 nA = texture2D(relCascalho, p / 3.5).xyz * 2.0 - 1.0;
-  vec3 nB = texture2D(relCinza, p / 4.0).xyz * 2.0 - 1.0;
-  vec3 nC = texture2D(relEntulho, p / 3.0).xyz * 2.0 - 1.0;
-  vec3 mapN = mix(mix(nA, nB, gVermelho), nC, gEntulho);
+  float perto = smoothstep(400.0, 30.0, length(vViewPosition));
+  vec3 mapN = vec3(0.0, 0.0, 1.0);
+  if (gTeide < 0.999) {
+    vec3 nG = mix(texture2D(relGramaF, p / 2.0).xyz, texture2D(relGrama, p / 2.0).xyz, gTipo) * 2.0 - 1.0;
+    mapN = mix(nG, vec3(0.0, 0.0, 1.0), gTerra);
+  }
+  if (gTeide > 0.001) {
+    vec3 nA = texture2D(relCascalho, p / 3.5).xyz * 2.0 - 1.0;
+    vec3 nB = texture2D(relCinza, p / 4.0).xyz * 2.0 - 1.0;
+    vec3 nC = texture2D(relEntulho, p / 3.0).xyz * 2.0 - 1.0;
+    mapN = mix(mapN, mix(mix(nA, nB, gVermelho), nC, gEntulho), gTeide);
+  }
   mapN.xy *= normalScale * perto;
   normal = perturbNormal2Arb(- vViewPosition, normal, normalize(mapN), faceDirection);
 }
@@ -1021,6 +1040,7 @@ if (gTeide > 0.001) {
     const [, matChao] = await Promise.all([carregarAlturasTeide(), materialChaoMundo()]);
     elCargaBarra.style.width = '20%';
     montarChaoMundo(matChao);
+    montarCapim();
 
     // peças da vila
     elCargaTexto.textContent = 'Carregando a vila…';
@@ -1419,7 +1439,8 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
       heroi.atual.timeScale = Math.max(0.6, heroi.vel / TURBO / HEROI.passoCorrer);
     } else if (heroi.vel / TURBO > 0.2) {
       tocar(ANIM.andar);
-      heroi.atual.timeScale = Math.max(0.5, heroi.vel / TURBO / HEROI.passoAndar);
+      // andar ligeiro: a animação acelera até 1,9x (mais que isso as pernas ficariam esquisitas)
+      heroi.atual.timeScale = clamp(heroi.vel / TURBO / HEROI.passoAndar, 0.5, 1.9);
     } else {
       tocar(heroi.guarda > 0 ? ANIM.guarda : ANIM.parado, 0.35);
       if (heroi.atual) heroi.atual.timeScale = 1;
@@ -1554,7 +1575,7 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
   const CORES = {
     dia: { topo: new THREE.Color(0x3d7bbf), horiz: new THREE.Color(0xdbe6ee), baixo: new THREE.Color(0xb9c6d2), sol: new THREE.Color(0xffe8c8), ceu: new THREE.Color(0xcfe0f2), disco: new THREE.Color(1.0, 0.93, 0.78) },
     tarde: { topo: new THREE.Color(0x4f6a9c), horiz: new THREE.Color(0xf2b07a), baixo: new THREE.Color(0xa08876), sol: new THREE.Color(0xffa45e), ceu: new THREE.Color(0xf0c8a8), disco: new THREE.Color(1.0, 0.7, 0.4) },
-    noite: { topo: new THREE.Color(0x050a16), horiz: new THREE.Color(0x18202f), baixo: new THREE.Color(0x0e121a), sol: new THREE.Color(0x9fb4e8), ceu: new THREE.Color(0x40507a), disco: new THREE.Color(0.55, 0.6, 0.72) },
+    noite: { topo: new THREE.Color(0x0a1224), horiz: new THREE.Color(0x253045), baixo: new THREE.Color(0x141a24), sol: new THREE.Color(0xa8bcec), ceu: new THREE.Color(0x6a7aa4), disco: new THREE.Color(0.55, 0.6, 0.72) },
     cinza: { topo: new THREE.Color(0x34302e), horiz: new THREE.Color(0x6b605a), baixo: new THREE.Color(0x48423e), sol: new THREE.Color(0xc09070), ceu: new THREE.Color(0x8a7a70), disco: new THREE.Color(0.8, 0.4, 0.2) },
   };
   const luzDoDia = (h) => (h < 0.58 ? 1 : h < 0.7 ? 1 - suave(0.58, 0.7, h) : h < 0.92 ? 0 : suave(0.92, 1, h));
@@ -1585,12 +1606,13 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
     scene.background.copy(horizonte);
     scene.fog.color.copy(horizonte);
     sol.color.copy(corTmp.sol);
-    sol.intensity = (0.5 + 1.5 * luz) * (1 - 0.45 * escuro);
+    // de noite, um luar forte e azulado: a cena fica fria e mais escura, mas dá para enxergar e jogar
+    sol.intensity = (1.0 + 1.0 * luz) * (1 - 0.45 * escuro);
     luzCeu.color.copy(corTmp.ceu);
-    luzCeu.intensity = 0.25 + 0.35 * luz;
-    renderer.toneMappingExposure = (0.5 + 0.5 * luz) * (1 - 0.3 * escuro);
-    // as rochas escaneadas trazem a luz do dia na própria foto: de noite ela quase some
-    const brilhoFoto = 0.45 * (0.25 + 0.75 * luz) * (1 - 0.35 * escuro);
+    luzCeu.intensity = 0.55 + 0.05 * luz;
+    renderer.toneMappingExposure = (0.82 + 0.18 * luz) * (1 - 0.25 * escuro);
+    // as rochas escaneadas trazem a luz do dia na própria foto: de noite ela diminui
+    const brilhoFoto = 0.45 * (0.55 + 0.45 * luz) * (1 - 0.35 * escuro);
     for (const m of materiaisFoto) m.emissiveIntensity = brilhoFoto;
     if (fogueiras) fogueiras.material.opacity = clamp(1.15 - luz * 1.3 + escuro * 0.5, 0, 1);
   }
@@ -1615,6 +1637,106 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
     fogueiras = new THREE.Points(geo, new THREE.PointsMaterial({ size: 9, map: new THREE.CanvasTexture(c), color: 0xffb060, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, fog: false }));
     fogueiras.frustumCulled = false;
     scene.add(fogueiras);
+  }
+
+  // ---------- capim: folhas de grama em 3D em volta do herói (não no modo leve) ----------
+  // Cada folha é um fio de 3 trechos (5 triângulos) que o próprio shader põe no chão, curva, balança com o vento e
+  // esconde na praça, nas estradas, nas manchas de terra e no Teide. As folhas ficam presas ao mundo: quando o herói
+  // anda, as que saem por um lado do quadrado voltam pelo outro, já sem altura, na borda. A altura do chão vem de um
+  // mapa do vale (2 m por ponto) feito na carga.
+  const CAPIM = { n: QUALIDADE === 'alto' ? 200000 : 120000, lado: QUALIDADE === 'alto' ? 48 : 38, x0: -512, z0: -440, tam: 1024, res: 512 };
+  let capim = null, capimDesligado = false;
+  function montarCapim() {
+    if (LEVE) return;
+    const N = CAPIM.res, passo = CAPIM.tam / N;
+    const alt = new Float32Array(N * N);
+    for (let k = 0; k < N; k++) for (let i = 0; i < N; i++) alt[k * N + i] = alturaVila(CAPIM.x0 + (i + 0.5) * passo, CAPIM.z0 + (k + 0.5) * passo);
+    const mapa = new THREE.DataTexture(alt, N, N, THREE.RedFormat, THREE.FloatType);
+    mapa.minFilter = mapa.magFilter = renderer.extensions.has('OES_texture_float_linear') ? THREE.LinearFilter : THREE.NearestFilter;
+    mapa.needsUpdate = true;
+    // o fio: base larga, ponta fina; y vai de 0 (chão) a 1 (ponta)
+    const geo = new THREE.InstancedBufferGeometry();
+    const larg = [0.02, 0.015, 0.008], pos = [];
+    for (let s = 0; s < 3; s++) pos.push(-larg[s], s / 3, 0, larg[s], s / 3, 0);
+    pos.push(0, 1, 0);
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    geo.setAttribute('normal', new THREE.Float32BufferAttribute([0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0], 3));
+    geo.setIndex([0, 1, 2, 1, 3, 2, 2, 3, 4, 3, 5, 4, 4, 5, 6]);
+    // touceiras: grupos de 10 fios em volta de um ponto
+    const rnd = sorteador(777), folha = new Float32Array(CAPIM.n * 4);
+    let cx = 0, cz = 0;
+    for (let i = 0; i < CAPIM.n; i++) {
+      if (i % 10 === 0) { cx = rnd() * CAPIM.lado; cz = rnd() * CAPIM.lado; }
+      const a = rnd() * Math.PI * 2, r = Math.sqrt(rnd()) * 0.16;
+      folha[i * 4] = (cx + Math.cos(a) * r + CAPIM.lado) % CAPIM.lado;
+      folha[i * 4 + 1] = (cz + Math.sin(a) * r + CAPIM.lado) % CAPIM.lado;
+      folha[i * 4 + 2] = rnd() * Math.PI * 2;
+      folha[i * 4 + 3] = 0.45 + rnd() * 0.8;
+    }
+    geo.setAttribute('folha', new THREE.InstancedBufferAttribute(folha, 4));
+    geo.instanceCount = CAPIM.n;
+    const u = { alturas: { value: mapa }, centro: { value: new THREE.Vector2() }, tempo: { value: 0 }, area: { value: new THREE.Vector4(CAPIM.x0, CAPIM.z0, CAPIM.tam, CAPIM.lado) } };
+    const mat = new THREE.MeshLambertMaterial({ side: THREE.DoubleSide });
+    mat.onBeforeCompile = (sh) => {
+      Object.assign(sh.uniforms, u);
+      sh.vertexShader = sh.vertexShader
+        .replace('#include <common>', `#include <common>
+uniform sampler2D alturas;
+uniform vec2 centro;
+uniform float tempo;
+uniform vec4 area;
+attribute vec4 folha;
+varying float vAlt;
+varying float vTom;`)
+        // a normal fica entre "para cima" e a face do fio: cada fio pega a luz de um jeito, conforme vira
+        .replace('#include <beginnormal_vertex>', 'vec3 objectNormal = normalize(vec3(-sin(folha.z) * 0.45, 1.0, cos(folha.z) * 0.45));')
+        .replace('#include <begin_vertex>', `
+  float lado = area.w;
+  vec2 rel = mod(folha.xy - centro + lado * 0.5, lado) - lado * 0.5;
+  vec2 pw = centro + rel;
+  float alto = folha.w * (1.0 - smoothstep(lado * 0.2, lado * 0.49, length(rel)));
+  // sem capim na praça, nas estradas, nas manchas de terra e no Teide (as mesmas contas da pintura do chão)
+  float n = sin(pw.x * 0.23 + sin(pw.y * 0.17) * 2.0) * sin(pw.y * 0.19 + 1.3) * 0.5 + 0.5;
+  float n2 = sin(pw.x * 0.61 + 0.7) * sin(pw.y * 0.53 - 0.4) * 0.5 + 0.5;
+  float manchas = smoothstep(0.7, 0.95, n * 0.7 + n2 * 0.3);
+  float eixo = min(abs(pw.x), abs(pw.y)), quadra = max(abs(pw.x), abs(pw.y));
+  float estrada = smoothstep(4.6, 2.8, eixo) * step(15.0, quadra);
+  float volta = smoothstep(4.6, 1.6, abs(quadra - 15.5));
+  alto *= (1.0 - clamp(max(max(manchas, estrada), volta), 0.0, 1.0)) * step(16.5, quadra) * smoothstep(-400.0, -375.0, pw.y);
+  vec2 uvA = (pw - area.xy) / area.z;
+  alto *= step(0.0, uvA.x) * step(uvA.x, 1.0) * step(0.0, uvA.y) * step(uvA.y, 1.0);
+  float h = texture2D(alturas, uvA).r;
+  float c = cos(folha.z), s = sin(folha.z), y = position.y;
+  vec3 transformed = vec3(position.x * c, y * 0.42 * alto, position.x * s);
+  // a ponta pende para um lado e balança com o vento (rajadas que passam pelo campo)
+  float vento = sin(tempo * 1.6 + pw.x * 0.31 + pw.y * 0.23) * 0.6 + sin(tempo * 3.7 + pw.x * 1.7 - pw.y * 1.3) * 0.25;
+  vec2 pende = vec2(sin(folha.z * 3.0), cos(folha.z * 3.0)) * 0.13 + vec2(0.17, 0.1) * vento;
+  transformed.xz += pende * y * y * alto;
+  transformed += vec3(pw.x, h - 0.03, pw.y);
+  vAlt = y;
+  vTom = fract(folha.z * 7.31 + folha.w * 3.17);`);
+      sh.fragmentShader = sh.fragmentShader
+        .replace('#include <common>', '#include <common>\nvarying float vAlt;\nvarying float vTom;')
+        .replace('#include <color_fragment>', `
+  vec3 corFio = mix(vec3(0.025, 0.04, 0.01), vec3(0.17, 0.23, 0.05), smoothstep(0.0, 1.0, vAlt));
+  corFio = mix(corFio, vec3(0.32, 0.28, 0.12) * (0.4 + 0.6 * vAlt), step(0.88, vTom));   // alguns fios secos
+  diffuseColor.rgb = corFio * (0.8 + 0.4 * vTom);`)
+        // o fio é visto dos dois lados: a luz é a mesma (sem isso, o lado de trás ficaria escuro)
+        .replace('#include <normal_fragment_begin>', '#include <normal_fragment_begin>\n  normal = normalize(vNormal);\n  geometryNormal = normal;');
+    };
+    mat.customProgramCacheKey = () => 'capim';
+    capim = new THREE.Mesh(geo, mat);
+    capim.frustumCulled = false;
+    capim.receiveShadow = true;
+    capim.userData.u = u;
+    scene.add(capim);
+  }
+  function atualizarCapim(dt) {
+    if (!capim) return;
+    const u = capim.userData.u;
+    u.centro.value.set(heroi.pos.x, heroi.pos.z);
+    u.tempo.value += dt;
+    capim.visible = !capimDesligado && heroi.pos.z > -440;
   }
 
   // ---------- árvores e pedras: cortar e quebrar ----------
@@ -2840,6 +2962,7 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
   let tLento = 0, tSalvar = 0, tRenda = 0;
   function atualizarJogo(dt, real) {
     atualizarCeu(dt);
+    atualizarCapim(dt);
     if (!jogoPronto) {
       if (extrasProntos && heroi.modelo && TEIDE.alturas) montarJogo();
       return;
@@ -2922,6 +3045,7 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
     else if (media > 58) RESOLUCAO.atual = Math.min(RESOLUCAO.max, RESOLUCAO.atual + 0.05);
     if (RESOLUCAO.atual !== antes) { renderer.setPixelRatio(RESOLUCAO.atual); redimensionar(); }
     lentos = media < 24 && RESOLUCAO.atual <= RESOLUCAO.min ? lentos + 1 : 0;
+    if (lentos >= 3 && QUALIDADE === 'auto' && capim && !capimDesligado) { capimDesligado = true; lentos = 0; }
     if (lentos >= 3 && QUALIDADE === 'auto' && renderer.shadowMap.enabled) {
       renderer.shadowMap.enabled = false;
       sol.castShadow = false;

@@ -8,6 +8,13 @@ A história (duas propostas, com a recomendada e a comparação) está em [HISTO
 
 Para conferir o mapa depressa, abra com `?turbo=10` no endereço (herói 10x mais rápido).
 
+## A grama
+
+O chão do vale mistura duas gramas do Poly Haven no tamanho real (2 m), cada uma com o seu relevo (mapa de normais),
+trocando em manchas grandes. Perto do herói nasce **capim em 3D**: dezenas de milhares de fios finos, em touceiras,
+que o shader põe no chão, curva e balança com o vento; eles somem na praça, nas estradas e nas manchas de terra. O
+capim fica desligado no modo leve e, no automático, é a primeira coisa a sumir se o jogo ficar lento.
+
 ## O céu
 
 Duas fotos de céu do Poly Haven, só a metade de cima, em `ceu/` (WebP): de dia, nuvens com o sol a 48° (a foto é
@@ -173,6 +180,6 @@ as estradas de terra saindo da praça.
 - Árvores e pedras dos bosques: [Stylized Nature MegaKit](https://quaternius.itch.io/stylized-nature-megakit), Quaternius (CC0).
 - Torre de vigia, portal gótico e árvore seca: modelos "pixellabs" enviados pelo dono do jogo (conferir a licença antes de publicar).
 - Pico rochoso, Ponte natural e pedras de Mt Andrew: escaneamentos do Sketchfab enviados pelo dono do jogo (conferir autor e licença antes de publicar).
-- Grama, terra e cascalho: [Poly Haven](https://polyhaven.com) (CC0).
+- Grama ([Forest Ground 01](https://polyhaven.com/a/forrest_ground_01) e [Leafy Grass](https://polyhaven.com/a/leafy_grass)), terra e cascalho: [Poly Haven](https://polyhaven.com) (CC0).
 - Céu: [Kloofendal 48d Partly Cloudy (Pure Sky)](https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky) e [Qwantani Night (Pure Sky)](https://polyhaven.com/a/qwantani_night_puresky), Greg Zaal e Jarod Guest, Poly Haven (CC0).
 - Terreno do Teide: [El Teide en 3D](https://sketchfab.com/3d-models/el-teide-en-3d-4a961a00043e4d6b912506f9ac895825), por @x_y_es (Sketchfab, CC BY 4.0).
