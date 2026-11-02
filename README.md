@@ -8,6 +8,14 @@ A história (duas propostas, com a recomendada e a comparação) está em [HISTO
 
 Para conferir o mapa depressa, abra com `?turbo=10` no endereço (herói 10x mais rápido).
 
+## O céu
+
+Duas fotos de céu do Poly Haven, só a metade de cima, em `ceu/` (WebP): de dia, nuvens com o sol a 48° (a foto é
+girada para o sol dela ficar na direção da luz do jogo, então as sombras batem); de noite, a Via Láctea. O dia passa
+para a noite misturando as duas, com o tom laranja do entardecer e o cinza do dia escuro por cima. A névoa usa a cor
+do horizonte da foto, e o reflexo do céu nos objetos sai da própria foto. Tamanho da foto: 2048 px no modo leve, 4096 no
+automático e 8192 no alto.
+
 ## Como se joga
 
 A história recomendada (*Cavaleiro do Teide*) virou o jogo. Duarte chega a um vale com 12 casas em ruína (paredes
@@ -166,4 +174,5 @@ as estradas de terra saindo da praça.
 - Torre de vigia, portal gótico e árvore seca: modelos "pixellabs" enviados pelo dono do jogo (conferir a licença antes de publicar).
 - Pico rochoso, Ponte natural e pedras de Mt Andrew: escaneamentos do Sketchfab enviados pelo dono do jogo (conferir autor e licença antes de publicar).
 - Grama, terra e cascalho: [Poly Haven](https://polyhaven.com) (CC0).
+- Céu: [Kloofendal 48d Partly Cloudy (Pure Sky)](https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky) e [Qwantani Night (Pure Sky)](https://polyhaven.com/a/qwantani_night_puresky), Greg Zaal e Jarod Guest, Poly Haven (CC0).
 - Terreno do Teide: [El Teide en 3D](https://sketchfab.com/3d-models/el-teide-en-3d-4a961a00043e4d6b912506f9ac895825), por @x_y_es (Sketchfab, CC BY 4.0).

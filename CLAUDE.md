@@ -17,7 +17,7 @@
   Chrome.
 - O dono quer visual o mais realista possível e joga no PC (teclado e touchpad).
 - Pastas: `modelos/` (herói e animações), `vila/` (peças da vila, árvores e pedras, grama e terra), `objetos/`
-  (terrenos escaneados e itens postos na vila), `terreno/` (o Teide), `ferramentas/` (conversores com o Blender como
+  (terrenos escaneados e itens postos na vila), `terreno/` (o Teide), `ceu/` (fotos do céu do Poly Haven), `ferramentas/` (conversores com o Blender como
   módulo do Python).
 - A história do jogo está em `HISTORIA.md` (duas propostas; a recomendada é "Cavaleiro do Teide").
 - O mundo é um mapa só: a vila no vale ao sul e o Teide (terra dos vilões, sem verde) ao norte, atrás do Pico.

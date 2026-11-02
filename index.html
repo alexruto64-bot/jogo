@@ -310,8 +310,10 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
   scene.fog = MAPA === 'vila' ? new THREE.Fog(COR_HORIZONTE.clone(), 180, 1300) : new THREE.Fog(COR_HORIZONTE.clone(), 600, 3600);
   const camera = new THREE.PerspectiveCamera(50, 1, 0.3, 8000);
 
-  // luz do fim de tarde, com sombras que acompanham o herói
-  const SOL_DIR = new THREE.Vector3(-0.55, 0.62, -0.45).normalize();
+  // Luz do sol, com sombras que acompanham o herói. A altura (48°) é a do sol na foto do céu (Poly Haven); a foto é
+  // girada para o sol dela ficar nesta direção.
+  const SOL_ALT = 48 * Math.PI / 180, SOL_AZ = Math.atan2(-0.45, -0.55);
+  const SOL_DIR = new THREE.Vector3(Math.cos(SOL_ALT) * Math.cos(SOL_AZ), Math.sin(SOL_ALT), Math.cos(SOL_ALT) * Math.sin(SOL_AZ));
   const sol = new THREE.DirectionalLight(0xffe8c8, 2.0);
   sol.castShadow = !LEVE;
   const TAM_SOMBRA = QUALIDADE === 'alto' ? 4096 : 2048;
@@ -323,23 +325,67 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
   const luzCeu = new THREE.HemisphereLight(0xcfe0f2, MAPA === 'vila' ? 0x5d6b45 : 0x6b5b45, 0.6);
   scene.add(luzCeu);
 
-  // céu em gradiente, com o sol (de noite o disco vira a lua, mais fraca e fria)
+  // Céu: duas fotos do Poly Haven (CC0), uma de dia (Kloofendal 48d Partly Cloudy, nuvens e sol a 48°) e uma de noite
+  // (Qwantani Night, com a Via Láctea), só a metade de cima (até 6° abaixo do horizonte). O dia passa para a noite
+  // misturando as duas, com o tom do entardecer por cima. Enquanto as fotos não chegam, fica o gradiente.
+  const CEU_EL_MIN = -6 * Math.PI / 180;
   const ceu = new THREE.Mesh(new THREE.SphereGeometry(5000, 32, 16), new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false,
-    uniforms: { corTopo: { value: new THREE.Color(0x3d7bbf) }, corHorizonte: { value: COR_HORIZONTE.clone() }, corBaixo: { value: new THREE.Color(0xb9c6d2) }, solDir: { value: SOL_DIR.clone() }, corSol: { value: new THREE.Color(1.0, 0.93, 0.78) } },
+    uniforms: {
+      corTopo: { value: new THREE.Color(0x3d7bbf) }, corHorizonte: { value: COR_HORIZONTE.clone() }, corBaixo: { value: new THREE.Color(0xb9c6d2) },
+      solDir: { value: SOL_DIR.clone() }, corSol: { value: new THREE.Color(1.0, 0.93, 0.78) },
+      fotoDia: { value: null }, fotoNoite: { value: null }, temDia: { value: 0 }, temNoite: { value: 0 }, noite: { value: 0 },
+      tomDia: { value: new THREE.Color(1, 1, 1) }, tomNoite: { value: new THREE.Color(0.38, 0.41, 0.52) },
+      giro: { value: SOL_AZ - (0.5952 - 0.5) * 2 * Math.PI }, elMin: { value: CEU_EL_MIN },
+    },
     vertexShader: 'varying vec3 vDir; void main(){ vDir = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
-    fragmentShader: 'uniform vec3 corTopo, corHorizonte, corBaixo, solDir, corSol; varying vec3 vDir; void main(){ vec3 d = normalize(vDir); vec3 c = d.y > 0.0 ? mix(corHorizonte, corTopo, pow(d.y, 0.6)) : mix(corHorizonte, corBaixo, min(1.0, -d.y * 4.0)); float s = max(dot(d, normalize(solDir)), 0.0); c += corSol * (pow(s, 800.0) * 1.3 + pow(s, 12.0) * 0.14); gl_FragColor = vec4(c, 1.0); }',
+    fragmentShader: `uniform vec3 corTopo, corHorizonte, corBaixo, solDir, corSol, tomDia, tomNoite;
+uniform sampler2D fotoDia, fotoNoite;
+uniform float temDia, temNoite, noite, giro, elMin;
+varying vec3 vDir;
+void main(){
+  vec3 d = normalize(vDir);
+  vec3 c = d.y > 0.0 ? mix(corHorizonte, corTopo, pow(d.y, 0.6)) : mix(corHorizonte, corBaixo, min(1.0, -d.y * 4.0));
+  float s = max(dot(d, normalize(solDir)), 0.0);
+  c += corSol * (pow(s, 800.0) * 1.3 + pow(s, 12.0) * 0.14) * (1.0 - temDia);
+  // mesma convenção das fotos equirretangulares do three: u pela volta, v pela altura
+  vec2 uv = vec2(fract((atan(d.z, d.x) - giro) * 0.15915494 + 0.5), clamp((asin(clamp(d.y, -1.0, 1.0)) - elMin) / (1.5707963 - elMin), 0.0, 1.0));
+  vec3 dia = temDia > 0.5 ? texture2D(fotoDia, uv).rgb * tomDia : c;
+  vec3 escuro = temNoite > 0.5 ? texture2D(fotoNoite, uv).rgb * tomNoite : c;
+  gl_FragColor = vec4(mix(dia, escuro, noite), 1.0);
+}`,
   }));
   ceu.renderOrder = -1;
   ceu.frustumCulled = false;
   scene.add(ceu);
-  {
+  // a luz que vem do céu (reflexos e sombra suave) sai do próprio céu; é refeita quando a foto do dia chega
+  function gerarAmbiente() {
     const pmrem = new THREE.PMREMGenerator(renderer);
     const cenaEnv = new THREE.Scene();
     cenaEnv.add(new THREE.Mesh(new THREE.SphereGeometry(50, 32, 16), ceu.material));
     cenaEnv.add(new THREE.Mesh(new THREE.SphereGeometry(49, 16, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), new THREE.MeshBasicMaterial({ color: MAPA === 'vila' ? 0x56603f : 0x7a6a52, side: THREE.BackSide })));
+    const noiteAntes = ceu.material.uniforms.noite.value;
+    ceu.material.uniforms.noite.value = 0;   // o ambiente é sempre o de dia; a noite escurece pela exposição
+    const velho = scene.environment;
     scene.environment = pmrem.fromScene(cenaEnv, 0.04).texture;
+    ceu.material.uniforms.noite.value = noiteAntes;
+    if (velho) velho.dispose();
     pmrem.dispose();
+  }
+  gerarAmbiente();
+  {
+    const tam = QUALIDADE === 'alto' ? 8192 : LEVE ? 2048 : 4096;
+    const foto = (nome, w, uniforme, tem, depois) => new THREE.TextureLoader().loadAsync(`ceu/${nome}-${w}.webp`).then((t) => {
+      t.wrapS = THREE.RepeatWrapping;
+      t.generateMipmaps = false;           // sem mipmap não aparece a costura onde a volta fecha
+      t.minFilter = THREE.LinearFilter;
+      const u = ceu.material.uniforms;
+      u[uniforme].value = t;
+      u[tem].value = 1;
+      if (depois) depois();
+    }).catch((e) => console.warn('céu sem foto:', e.message));
+    foto('dia', tam, 'fotoDia', 'temDia', gerarAmbiente);
+    foto('noite', Math.min(tam, 4096), 'fotoNoite', 'temNoite');
   }
 
   // ---------- utilidades de carga ----------
@@ -969,7 +1015,7 @@ if (gTeide > 0.001) {
   async function montarVila() {
     alturaEm = alturaComObjetos;
     LIMITES = { xmin: -950, xmax: 950, zmin: -2440, zmax: 600 };
-    $('creditos').innerHTML = 'Casas e herói: <a href="https://quaternius.com" target="_blank" rel="noopener">Quaternius</a> (CC0). Grama e terra: <a href="https://polyhaven.com" target="_blank" rel="noopener">Poly Haven</a> (CC0).';
+    $('creditos').innerHTML = 'Casas e herói: <a href="https://quaternius.com" target="_blank" rel="noopener">Quaternius</a> (CC0). Grama, terra e céu: <a href="https://polyhaven.com" target="_blank" rel="noopener">Poly Haven</a> (CC0).';
     // chão do mundo inteiro: o vale da vila e, atrás do Pico, o Teide
     elCargaTexto.textContent = 'Preparando o chão…';
     const [, matChao] = await Promise.all([carregarAlturasTeide(), materialChaoMundo()]);
@@ -1161,6 +1207,7 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
         m.emissiveMap = m.map;
         m.emissive.set(0xffffff);
         m.emissiveIntensity = 0.45;
+        materiaisFoto.push(m);   // de noite esse brilho próprio diminui (ver atualizarCeu)
         m.color.setScalar(0.3);
         m.onBeforeCompile = comGrao(texGrao);
       }
@@ -1513,6 +1560,11 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
   const luzDoDia = (h) => (h < 0.58 ? 1 : h < 0.7 ? 1 - suave(0.58, 0.7, h) : h < 0.92 ? 0 : suave(0.92, 1, h));
   const tardeDoDia = (h) => Math.max(0, 1 - Math.abs(h - 0.64) / 0.07) + Math.max(0, 1 - Math.abs(h - 0.955) / 0.045);
   const corTmp = { topo: new THREE.Color(), horiz: new THREE.Color(), baixo: new THREE.Color(), sol: new THREE.Color(), ceu: new THREE.Color(), disco: new THREE.Color() };
+  // cor do horizonte nas fotos do céu (média de 0° a 3° de altura) e os tons por cima da foto do dia
+  const HORIZ_FOTO_DIA = new THREE.Color(153 / 255, 157.6 / 255, 172.2 / 255), HORIZ_FOTO_NOITE = new THREE.Color(142.8 / 255, 147.3 / 255, 138 / 255);
+  const TOM_TARDE = new THREE.Color(1.0, 0.68, 0.46), TOM_CINZA = new THREE.Color(0.5, 0.46, 0.43);
+  const horizonte = new THREE.Color(), corNoite = new THREE.Color();
+  const materiaisFoto = [];
   function nomeDaHora(h) { return h < 0.25 ? 'manhã' : h < 0.58 ? 'tarde' : h < 0.7 ? 'entardecer' : h < 0.92 ? 'noite' : 'madrugada'; }
   function atualizarCeu(dt) {
     JOGO.escuro += (JOGO.escuroAlvo - JOGO.escuro) * (1 - Math.exp(-dt * 0.5));
@@ -1520,13 +1572,26 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
     for (const k in corTmp) corTmp[k].copy(CORES.noite[k]).lerp(CORES.dia[k], luz).lerp(CORES.tarde[k], tarde).lerp(CORES.cinza[k], escuro);
     const u = ceu.material.uniforms;
     u.corTopo.value.copy(corTmp.topo); u.corHorizonte.value.copy(corTmp.horiz); u.corBaixo.value.copy(corTmp.baixo); u.corSol.value.copy(corTmp.disco);
-    scene.background.copy(corTmp.horiz);
-    scene.fog.color.copy(corTmp.horiz);
+    // as fotos do céu: o dia ganha o tom do entardecer (ou o cinza do dia escuro) e se mistura com a noite
+    u.noite.value = 1 - luz;
+    u.tomDia.value.setRGB(1, 1, 1).lerp(TOM_TARDE, tarde).lerp(TOM_CINZA, escuro);
+    // a névoa tem a cor do horizonte da foto, para o chão lá longe se fundir com o céu
+    if (u.temDia.value) {
+      horizonte.copy(HORIZ_FOTO_DIA).multiply(u.tomDia.value);
+      corNoite.copy(u.temNoite.value ? HORIZ_FOTO_NOITE : CORES.noite.horiz);
+      if (u.temNoite.value) corNoite.multiply(u.tomNoite.value);
+      horizonte.lerp(corNoite, 1 - luz);
+    } else horizonte.copy(corTmp.horiz);
+    scene.background.copy(horizonte);
+    scene.fog.color.copy(horizonte);
     sol.color.copy(corTmp.sol);
     sol.intensity = (0.5 + 1.5 * luz) * (1 - 0.45 * escuro);
     luzCeu.color.copy(corTmp.ceu);
     luzCeu.intensity = 0.25 + 0.35 * luz;
     renderer.toneMappingExposure = (0.5 + 0.5 * luz) * (1 - 0.3 * escuro);
+    // as rochas escaneadas trazem a luz do dia na própria foto: de noite ela quase some
+    const brilhoFoto = 0.45 * (0.25 + 0.75 * luz) * (1 - 0.35 * escuro);
+    for (const m of materiaisFoto) m.emissiveIntensity = brilhoFoto;
     if (fogueiras) fogueiras.material.opacity = clamp(1.15 - luz * 1.3 + escuro * 0.5, 0, 1);
   }
   // As fogueiras do paredão (o relógio da história): pontos de fogo no Pico que só aparecem de noite. Cada pedra-sol
@@ -2774,11 +2839,11 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
   }
   let tLento = 0, tSalvar = 0, tRenda = 0;
   function atualizarJogo(dt, real) {
+    atualizarCeu(dt);
     if (!jogoPronto) {
       if (extrasProntos && heroi.modelo && TEIDE.alturas) montarJogo();
       return;
     }
-    atualizarCeu(dt);
     atualizarTextos(real);
     if (!$('cartao').hidden) atualizarAbertura();
     if (JOGO.pausado) return;
