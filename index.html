@@ -4,7 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Cavaleiro do Teide</title>
-<meta name="description" content="O herói andando pela vila medieval ou pelo terreno real do Teide.">
+<meta name="description" content="Uma vila ao pé do Teide, cristais de fogo e os vilões atrás da montanha.">
+<meta name="theme-color" content="#1f1c18">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icones/icone-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Source+Sans+3:wght@400;600&display=swap">
@@ -76,6 +79,11 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
 .barra span { display: block; height: 100%; width: 0; background: var(--ouro); transition: width 0.2s; }
 .creditos { position: fixed; z-index: 2; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); margin: 0; font-size: 11px; line-height: 1.4; color: var(--texto-suave); text-align: right; max-width: 46vw; }
 .creditos a { color: var(--texto-suave); }
+.aviso {
+  position: fixed; z-index: 3; left: 50%; transform: translateX(-50%);
+  top: calc(64px + env(safe-area-inset-top, 0px)); width: min(560px, calc(100vw - 32px));
+  margin: 0; padding: 10px 14px; font-size: 13px; line-height: 1.45; color: var(--texto); border-color: var(--ouro);
+}
 @media (max-width: 640px) { .ajuda, .creditos { display: none; } }
 </style>
 </head>
@@ -89,8 +97,10 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
     <select class="mapa" id="mapa-lista" aria-label="Mapa"></select>
     <button class="mapa seta" type="button" id="mapa-prox" aria-label="Próximo mapa">▶</button>
   </div>
+  <button class="mapa" type="button" id="graficos" title="Muda a qualidade dos gráficos (recarrega a página)">Gráficos: automático</button>
 </section>
 <p class="painel info" id="info">—</p>
+<p class="painel aviso" id="aviso" hidden></p>
 <section class="painel ajuda" aria-label="Comandos">
   <b>Comandos</b>
   <dl>
@@ -114,6 +124,7 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/utils/SkeletonUtils.js"></script>
 <script>
 (() => {
   'use strict';
@@ -124,12 +135,11 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
   function falhar(t) { elCargaTexto.textContent = t; elCargaBarra.style.background = '#c8352b'; }
   if (!window.THREE) { falhar('O motor 3D não carregou. Confira a internet e recarregue.'); return; }
 
-  // Mapas, na ordem dos botões ◀ ▶. O escolhido vai no endereço (#teide); sem nada, abre a vila.
-  // Só o mapa escolhido é carregado. Para avaliar um terreno escaneado novo como mapa inteiro, ponha os arquivos em
-  // mapas/<id>/ e acrescente { id, nome, escaneado: true } aqui.
+  // Mapas, na ordem dos botões ◀ ▶ (o escolhido vai no endereço). O Teide agora fica dentro do mapa da vila, atrás do
+  // Pico. Para avaliar um terreno escaneado novo como mapa inteiro, ponha os arquivos em mapas/<id>/ e acrescente
+  // { id, nome, escaneado: true } aqui; com um mapa só, o seletor some.
   const MAPAS = [
     { id: 'vila', nome: 'Vila medieval' },
-    { id: 'teide', nome: 'Teide' },
   ];
   const MAPA_INFO = MAPAS.find((m) => '#' + m.id === location.hash) || MAPAS[0];
   const MAPA = MAPA_INFO.id;
@@ -142,8 +152,22 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
     $('mapa-ant').addEventListener('click', () => irPara(MAPAS[(i + MAPAS.length - 1) % MAPAS.length].id));
     $('mapa-prox').addEventListener('click', () => irPara(MAPAS[(i + 1) % MAPAS.length].id));
     window.addEventListener('hashchange', () => location.reload());
+    if (MAPAS.length < 2) document.querySelector('.mapas').style.display = 'none';
   }
-  const LEVE = new URLSearchParams(location.search).has('leve');   // ?leve=1: malha e sombras menores
+  // Qualidade dos gráficos (botão no topo, guardada no navegador): "automático" ajusta a resolução ao FPS; "leve" usa
+  // chão mais simples, metade das árvores, sem sombras e resolução baixa; "alto" usa resolução e sombras máximas.
+  // ?leve=1 no endereço também liga o modo leve.
+  const lerLocal = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const gravarLocal = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* sem armazenamento: só não guarda */ } };
+  const QUALIDADES = { auto: 'automático', leve: 'leve', alto: 'alto' };
+  const QUALIDADE = new URLSearchParams(location.search).has('leve') ? 'leve' : (QUALIDADES[lerLocal('qualidade')] ? lerLocal('qualidade') : 'auto');
+  const LEVE = QUALIDADE === 'leve';
+  {
+    const b = $('graficos'), ordem = Object.keys(QUALIDADES);
+    b.textContent = 'Gráficos: ' + QUALIDADES[QUALIDADE];
+    b.addEventListener('click', () => { gravarLocal('qualidade', ordem[(ordem.indexOf(QUALIDADE) + 1) % ordem.length]); location.reload(); });
+  }
+  function mostrarAviso(texto) { const a = $('aviso'); a.textContent = texto; a.hidden = false; }
   // Arquivos: no link do Claude os .glb vão como texto (base64), porque lá .glb não é servido;
   // a cópia para lá troca o sufixo abaixo por '.txt'.
   const SUFIXO_GLB = '';
@@ -160,24 +184,38 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
 
   const canvas = $('cena');
   let renderer;
-  try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' }); }
+  try { renderer = new THREE.WebGLRenderer({ canvas, antialias: !LEVE, powerPreference: 'high-performance' }); }
   catch (e) { falhar('Este navegador não conseguiu ligar o 3D (WebGL).'); return; }
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  // Resolução: no automático começa em até 1,25x a tela e o laço sobe ou desce conforme o FPS (entre RESOLUCAO.min e .max)
+  const DPR = window.devicePixelRatio || 1;
+  const RESOLUCAO = QUALIDADE === 'alto' ? { atual: Math.min(DPR, 2), min: Math.min(DPR, 2), max: Math.min(DPR, 2) }
+    : LEVE ? { atual: Math.min(DPR, 0.85), min: 0.5, max: Math.min(DPR, 1) }
+      : { atual: Math.min(DPR, 1.25), min: 0.6, max: Math.min(DPR, 1.5) };
+  renderer.setPixelRatio(RESOLUCAO.atual);
   renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.enabled = !LEVE;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // Se o Chrome estiver sem aceleração gráfica, o 3D é desenhado pelo processador e tudo fica muito lento: avisa.
+  {
+    const gl = renderer.getContext(), ext = gl.getExtension('WEBGL_debug_renderer_info');
+    const placa = ext ? String(gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)) : '';
+    if (/swiftshader|llvmpipe|software|basic render/i.test(placa)) {
+      mostrarAviso('O Chrome está desenhando o jogo sem a placa de vídeo, por isso fica lento. Para resolver: Configurações do Chrome → Sistema → ligue "Usar aceleração gráfica quando disponível" e reinicie o Chrome.');
+    }
+  }
 
   const scene = new THREE.Scene();
   const COR_HORIZONTE = new THREE.Color(MAPA === 'vila' ? 0xdbe6ee : 0xd9e2ea);
   scene.background = COR_HORIZONTE.clone();
-  scene.fog = MAPA === 'vila' ? new THREE.Fog(COR_HORIZONTE.clone(), 160, 950) : new THREE.Fog(COR_HORIZONTE.clone(), 600, 3600);
+  scene.fog = MAPA === 'vila' ? new THREE.Fog(COR_HORIZONTE.clone(), 180, 1300) : new THREE.Fog(COR_HORIZONTE.clone(), 600, 3600);
   const camera = new THREE.PerspectiveCamera(50, 1, 0.3, 8000);
 
   // luz do fim de tarde, com sombras que acompanham o herói
   const SOL_DIR = new THREE.Vector3(-0.55, 0.62, -0.45).normalize();
   const sol = new THREE.DirectionalLight(0xffe8c8, 2.0);
-  sol.castShadow = true;
-  sol.shadow.mapSize.set(LEVE ? 1024 : 2048, LEVE ? 1024 : 2048);
+  sol.castShadow = !LEVE;
+  const TAM_SOMBRA = QUALIDADE === 'alto' ? 4096 : 2048;
+  sol.shadow.mapSize.set(TAM_SOMBRA, TAM_SOMBRA);
   Object.assign(sol.shadow.camera, { left: -60, right: 60, top: 60, bottom: -60, near: 1, far: 400 });
   sol.shadow.bias = -0.0008;
   sol.shadow.normalBias = 0.4;
@@ -226,7 +264,7 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
   // O chão de cada mapa responde à altura em (x, z); colisões empurram o herói para fora.
   let alturaEm = () => 0;
   let livreEm = () => true;      // nos mapas escaneados, fora do terreno não se anda
-  let LIMITE = 1000;
+  let LIMITES = { xmin: -1000, xmax: 1000, zmin: -1000, zmax: 1000 };   // até onde o herói anda
   let ZOOM_MAX = 90;
   const obstaculos = [];
   function obstaculo(x, z, hx, hz, rot) { obstaculos.push({ x, z, hx, hz, c: Math.cos(rot || 0), s: Math.sin(rot || 0) }); }
@@ -325,7 +363,7 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
   }
   // um morro grande ao norte, onde o Pico rochoso se apoia, e um platô a leste para a Ponte natural
   const MORRO_PICO = { x: 0, z: -235, r0: 60, r1: 170, h: 50 };
-  const PLATO_PONTE = { x: 130, z: -40, r0: 36, r1: 56, h: relevoBase(130, -40) };
+  const PLATO_PONTE = { x: 205, z: -15, r0: 110, r1: 150, h: 5 };
   function alturaVila(x, z) {
     let h = relevoBase(x, z);
     h += MORRO_PICO.h * suave(MORRO_PICO.r1, MORRO_PICO.r0, Math.hypot(x - MORRO_PICO.x, z - MORRO_PICO.z));
@@ -333,24 +371,285 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
     return h;
   }
 
+  // ---------- o Teide (terreno real, 2 km) atrás do Pico: a terra dos vilões ----------
+  // O mapa de alturas do Teide (512 × 512, 16 bits em R e G) fica com o centro em z = -1500. As alturas reais
+  // (138 a 371 m) descem 190 m para a borda sul emendar no vale. Entre z = -430 e -600 o chão passa do vale ao Teide.
+  const TEIDE = { cx: 0, cz: -1500, lado: 2000, desce: 190, n: 0, alturas: null };
+  const TEIDE_INICIO = -430, TEIDE_PLENO = -600;
+  async function carregarAlturasTeide() {
+    const meta = await (await fetch('terreno/terreno.json')).json();
+    const img = await carregarImagem('terreno/altura.png');
+    const n = meta.n, c = document.createElement('canvas');
+    c.width = c.height = n;
+    const g = c.getContext('2d');
+    g.drawImage(img, 0, 0);
+    const px = g.getImageData(0, 0, n, n).data;
+    const a = new Float32Array(n * n);
+    for (let i = 0; i < a.length; i++) a[i] = (meta.zmin + (px[i * 4] * 256 + px[i * 4 + 1]) / 65535 * (meta.zmax - meta.zmin)) * 100 - TEIDE.desce;
+    TEIDE.n = n;
+    TEIDE.alturas = a;
+  }
+  function alturaTeide(x, z) {
+    const n = TEIDE.n, L = TEIDE.lado, a = TEIDE.alturas;
+    const fx = clamp((x - TEIDE.cx + L / 2) / L * (n - 1), 0, n - 1.0001);
+    const fz = clamp((z - TEIDE.cz + L / 2) / L * (n - 1), 0, n - 1.0001);
+    const i = Math.floor(fx), k = Math.floor(fz), tx = fx - i, tz = fz - k;
+    return (a[k * n + i] * (1 - tx) + a[k * n + i + 1] * tx) * (1 - tz) + (a[(k + 1) * n + i] * (1 - tx) + a[(k + 1) * n + i + 1] * tx) * tz;
+  }
+  const pesoTeide = (z) => 1 - suave(TEIDE_PLENO, TEIDE_INICIO, z);
+  function alturaMundo(x, z) {
+    const w = TEIDE.alturas ? pesoTeide(z) : 0;
+    if (w <= 0) return alturaVila(x, z);
+    if (w >= 1) return alturaTeide(x, z);
+    return alturaVila(x, z) * (1 - w) + alturaTeide(x, z) * w;
+  }
+
+  // ---------- o chão do mundo: um terreno só, em blocos de 250 m (o que sai da tela não é desenhado) ----------
+  const CHAO = { xmin: -1000, xmax: 1000, zmin: -2500, zmax: 625 };
+  function montarChaoMundo(material) {
+    const passo = LEVE ? 10 : 5, porBloco = 250 / passo;
+    const nx = Math.round((CHAO.xmax - CHAO.xmin) / passo) + 1, nz = Math.round((CHAO.zmax - CHAO.zmin) / passo) + 1;
+    const H = new Float32Array(nx * nz);
+    for (let k = 0; k < nz; k++) for (let i = 0; i < nx; i++) H[k * nx + i] = alturaMundo(CHAO.xmin + i * passo, CHAO.zmin + k * passo);
+    const h = (i, k) => H[clamp(k, 0, nz - 1) * nx + clamp(i, 0, nx - 1)];
+    for (let bk = 0; bk < nz - 1; bk += porBloco) {
+      for (let bi = 0; bi < nx - 1; bi += porBloco) {
+        const ci = Math.min(porBloco, nx - 1 - bi), ck = Math.min(porBloco, nz - 1 - bk);
+        const nv = (ci + 1) * (ck + 1);
+        const pos = new Float32Array(nv * 3), nor = new Float32Array(nv * 3), uv = new Float32Array(nv * 2);
+        let o = 0;
+        for (let k = 0; k <= ck; k++) {
+          for (let i = 0; i <= ci; i++, o++) {
+            const gi = bi + i, gk = bk + k, x = CHAO.xmin + gi * passo, z = CHAO.zmin + gk * passo;
+            pos[o * 3] = x; pos[o * 3 + 1] = h(gi, gk); pos[o * 3 + 2] = z;
+            // normal pelas alturas vizinhas, igual dos dois lados da emenda entre blocos
+            const dx = (h(gi + 1, gk) - h(gi - 1, gk)) / (2 * passo), dz = (h(gi, gk + 1) - h(gi, gk - 1)) / (2 * passo);
+            const l = Math.hypot(dx, 1, dz);
+            nor[o * 3] = -dx / l; nor[o * 3 + 1] = 1 / l; nor[o * 3 + 2] = -dz / l;
+            uv[o * 2] = x / 4; uv[o * 2 + 1] = z / 4;
+          }
+        }
+        const idx = new Uint32Array(ci * ck * 6);
+        let p = 0;
+        for (let k = 0; k < ck; k++) {
+          for (let i = 0; i < ci; i++) {
+            const a = k * (ci + 1) + i, b = a + 1, c = a + ci + 1, d = c + 1;
+            idx[p++] = a; idx[p++] = c; idx[p++] = b; idx[p++] = b; idx[p++] = c; idx[p++] = d;
+          }
+        }
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        geo.setAttribute('normal', new THREE.BufferAttribute(nor, 3));
+        geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+        geo.setIndex(new THREE.BufferAttribute(idx, 1));
+        geo.computeBoundingSphere();
+        const bloco = new THREE.Mesh(geo, material);
+        bloco.receiveShadow = true;
+        scene.add(bloco);
+      }
+    }
+  }
+  // A pintura do chão: no vale, grama com manchas de terra e as estradas; no Teide, a foto dele dá as cores de longe e
+  // três fotos de chão (Poly Haven, CC0) dão o detalhe de perto: cascalho escuro, cinza vulcânica avermelhada onde a foto
+  // do Teide é avermelhada, e pedra quebrada nas encostas e em manchas. O relevo fino das três entra na luz.
+  async function materialChaoMundo() {
+    const nomes = ['vila/grama.jpg', 'vila/terra.jpg', 'terreno/textura.jpg', 'terreno/cascalho.jpg', 'terreno/cinza.jpg',
+      'terreno/entulho.jpg', 'terreno/cascalho_normal.jpg', 'terreno/cinza_normal.jpg', 'terreno/entulho_normal.jpg'];
+    const [grama, terra, fotoTeide, cascalho, cinza, entulho, relCascalho, relCinza, relEntulho] = await Promise.all(nomes.map(carregarTextura));
+    const aniso = renderer.capabilities.getMaxAnisotropy();
+    for (const t of [grama, terra, cascalho, cinza, entulho, relCascalho, relCinza, relEntulho]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = aniso; }
+    fotoTeide.anisotropy = aniso;
+    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95, metalness: 0, envMapIntensity: 0.35, normalMap: relCascalho, normalScale: new THREE.Vector2(1.2, 1.2) });
+    mat.onBeforeCompile = (sh) => {
+      Object.assign(sh.uniforms, {
+        grama: { value: grama }, terra: { value: terra }, fotoTeide: { value: fotoTeide },
+        cascalho: { value: cascalho }, cinza: { value: cinza }, entulho: { value: entulho },
+        relCascalho: { value: relCascalho }, relCinza: { value: relCinza }, relEntulho: { value: relEntulho },
+        teide: { value: new THREE.Vector4(TEIDE.cx, TEIDE.cz, TEIDE.lado, 0) },
+      });
+      sh.vertexShader = sh.vertexShader
+        .replace('#include <common>', '#include <common>\nvarying vec3 vMundo;\nvarying vec3 vNormalMundo;')
+        .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvMundo = (modelMatrix * vec4(transformed, 1.0)).xyz;\nvNormalMundo = mat3(modelMatrix) * objectNormal;');
+      sh.fragmentShader = sh.fragmentShader
+        .replace('#include <common>', `#include <common>
+varying vec3 vMundo;
+varying vec3 vNormalMundo;
+uniform sampler2D grama, terra, fotoTeide, cascalho, cinza, entulho, relCascalho, relCinza, relEntulho;
+uniform vec4 teide;
+vec3 lin(vec3 c) { return pow(c, vec3(2.2)); }
+const mat2 GIRO = mat2(0.8, -0.6, 0.6, 0.8);
+// a mesma foto em duas escalas, uma delas girada, para não aparecer a repetição
+vec3 duas(sampler2D t, vec2 p, float esc) { return mix(lin(texture2D(t, p / esc).rgb), lin(texture2D(t, GIRO * p / (esc * 3.7) + 0.31).rgb), 0.35); }
+float gTeide;
+float gVermelho;
+float gEntulho;`)
+        .replace('#include <map_fragment>', `#include <map_fragment>
+{
+  vec2 p = vMundo.xz;
+  gTeide = 1.0 - smoothstep(${TEIDE_PLENO.toFixed(1)}, ${TEIDE_INICIO.toFixed(1)}, p.y);
+  vec3 cor = vec3(1.0);
+  if (gTeide < 0.999) {
+    vec3 g = mix(lin(texture2D(grama, p / 3.2).rgb), lin(texture2D(grama, p / 13.0 + 0.31).rgb), 0.4);
+    g *= vec3(0.6, 0.74, 0.42);
+    vec3 t = lin(texture2D(terra, p / 3.0).rgb);
+    float n = sin(p.x * 0.23 + sin(p.y * 0.17) * 2.0) * sin(p.y * 0.19 + 1.3) * 0.5 + 0.5;
+    float n2 = sin(p.x * 0.61 + 0.7) * sin(p.y * 0.53 - 0.4) * 0.5 + 0.5;
+    float manchas = smoothstep(0.7, 0.95, n * 0.7 + n2 * 0.3) * 0.45;
+    float eixo = min(abs(p.x), abs(p.y));
+    float estrada = smoothstep(4.0, 2.2, eixo) * step(15.0, max(abs(p.x), abs(p.y)));
+    float volta = smoothstep(4.0, 1.0, abs(max(abs(p.x), abs(p.y)) - 15.5));
+    cor = mix(g, t, clamp(max(max(manchas, estrada), volta * 0.8), 0.0, 1.0));
+  }
+  if (gTeide > 0.001) {
+    vec3 macro = lin(texture2D(fotoTeide, (p - teide.xy) / teide.z + 0.5).rgb);
+    float inclin = 1.0 - normalize(vNormalMundo).y;
+    gVermelho = clamp((macro.r - macro.b) * 8.0 - 0.1, 0.0, 1.0);
+    float ruido = sin(p.x * 0.031 + sin(p.y * 0.023) * 2.0) * sin(p.y * 0.027 + 1.1) * 0.5 + 0.5;
+    gEntulho = clamp(smoothstep(0.18, 0.4, inclin) + smoothstep(0.72, 0.9, ruido) * 0.8, 0.0, 1.0);
+    vec3 d = mix(duas(cascalho, p, 3.5), duas(cinza, p, 4.0), gVermelho);
+    d = mix(d, duas(entulho, p, 3.0), gEntulho);
+    // de longe, o detalhe vira a cor média, para não aparecer padrão repetido
+    d = mix(d, vec3(0.175, 0.14, 0.11), smoothstep(150.0, 1200.0, length(vViewPosition)) * 0.6);
+    vec3 tom = clamp(macro / vec3(0.1319, 0.1057, 0.0946), 0.35, 2.6);
+    cor = mix(cor, d * mix(vec3(1.0), tom, 0.75) * 0.8, gTeide);
+  }
+  diffuseColor.rgb *= cor;
+}`)
+        .replace('#include <normal_fragment_maps>', `
+#ifdef TANGENTSPACE_NORMALMAP
+if (gTeide > 0.001) {
+  vec2 p = vMundo.xz;
+  float perto = smoothstep(400.0, 30.0, length(vViewPosition)) * gTeide;
+  vec3 nA = texture2D(relCascalho, p / 3.5).xyz * 2.0 - 1.0;
+  vec3 nB = texture2D(relCinza, p / 4.0).xyz * 2.0 - 1.0;
+  vec3 nC = texture2D(relEntulho, p / 3.0).xyz * 2.0 - 1.0;
+  vec3 mapN = mix(mix(nA, nB, gVermelho), nC, gEntulho);
+  mapN.xy *= normalScale * perto;
+  normal = perturbNormal2Arb(- vViewPosition, normal, normalize(mapN), faceDirection);
+}
+#endif`);
+    };
+    return mat;
+  }
+
   // ---------- em volta da vila: terrenos escaneados e itens (carregam depois que a vila abre) ----------
   const ESCANEADOS_VILA = [
     // paredão ao norte, de frente para a vila; rebaixado porque o escaneamento não cobre o pé dele no meio
     { id: 'pico', x: 0, z: -235, rot: 0, y: -30 },
-    { id: 'ponte', x: 130, z: -40, rot: -Math.PI / 2, enterrar: 0.4 },   // arco de pedra no platô a leste
+    { id: 'ponte', x: 205, z: -15, rot: -Math.PI / 2, enterrar: 2.0 },   // arco de pedra (240 m) no platô a leste
     { id: 'andrew', x: -16, z: -44, rot: 0.6, enterrar: 0.06 },          // pedras perto da vila
   ];
   // itens (glb com as texturas dentro); caixa = meia largura e meia profundidade para a colisão
   const ITENS_VILA = [
     { arq: 'torre-vigia', x: -50, z: -12, rot: Math.PI / 2, caixa: [3.0, 3.4] },
     { arq: 'portao', x: 0, z: -84, rot: 0, caixa: [2.0, 1.0] },
-    ...[[-40, 22, 0.3, 1], [38, -44, 2.1, 1.15], [-62, -34, 4.0, 0.9], [64, 52, 1.2, 1.1], [-46, 62, 5.1, 1],
-      [20, 64, 3.3, 0.85], [80, -12, 0.8, 1.2], [-86, 14, 2.6, 1], [48, -74, 5.6, 0.95], [-30, -76, 1.7, 1.1]]
-      .map(([x, z, rot, escala]) => ({ arq: 'arvore-seca', x, z, rot, escala, caixa: [0.45, 0.45], enterrar: 0.25 })),
+    // árvores secas em fila, do arco de pedra até o portal: marcam o caminho do tubo de lava (o gás mata as raízes)
+    ...[[0.06, 0.3, 1.1], [0.16, 2.1, 0.95], [0.26, 4.0, 1.15], [0.36, 1.2, 1], [0.46, 5.1, 0.9],
+      [0.56, 3.3, 1.1], [0.66, 0.8, 1.2], [0.76, 2.6, 1], [0.86, 5.6, 0.95], [0.95, 1.7, 1.05]]
+      .map(([t, rot, escala], i) => ({ arq: 'arvore-seca', x: 138 + (8 - 138) * t + (i % 2 ? 3 : -3), z: -32 + (-78 + 32) * t, rot, escala, caixa: [0.45, 0.45], enterrar: 0.25 })),
+    // pedra-sol: cristais de fogo nas rochas marcadas, ao longo da fila de árvores secas (o caminho do tubo de lava)
+    ...[[0.11, 1.0], [0.31, 0.8], [0.5, 1.3], [0.7, 0.9], [0.9, 1.1]]
+      .map(([t, escala], i) => ({ arq: 'cristal-sol', x: 138 + (8 - 138) * t + (i % 2 ? -6 : 6), z: -32 + (-78 + 32) * t + 4, rot: i * 1.7, escala, caixa: [0.35, 0.35], enterrar: 0.15 })),
+    // construções: a Torre da Luz e o castelo da fortaleza (capítulo 4), a casa-torre, a escada esculpida no pé do Pico
+    // e o moinho d'água ao lado do pasto
+    { arq: 'torre-da-luz', x: -95, z: -55, rot: voltadoPara(-95, -55, 0, 0), caixa: [4.0, 4.4], enterrar: 0.3 },
+    { arq: 'castelo-rocha', x: -330, z: 60, rot: voltadoPara(-330, 60, 0, 0), caixa: [15, 15], enterrar: 1.5 },
+    { arq: 'casa-torre', x: 58, z: -40, rot: voltadoPara(58, -40, 0, 0), caixa: [3.3, 3.4], enterrar: 0.2 },
+    // escada (10 m, sobe 6 m) na encosta do Pico: o pé fica no chão e o alto encosta no morro
+    { arq: 'escada-pedra', x: 35, z: -95, rot: 0.25, caixa: [4.4, 4.8], enterrar: 2.7 },
+    { arq: 'moinho', x: 80, z: 28, rot: -Math.PI / 2, caixa: [4.8, 5.2], enterrar: 0.3 },
+    // árvores avulsas: a árvore verde (a sua "árvore teste") perto das casas e troncos de bétula retorcidos
+    ...[[-55, 48, 0.4, 1.1], [15, 56, 1.9, 0.95], [-70, -22, 3.1, 1.2], [64, -14, 4.4, 1], [33, -56, 5.2, 0.9], [-36, 72, 2.2, 1.05]]
+      .map(([x, z, rot, escala]) => ({ arq: 'arvore-teste', x, z, rot, escala, caixa: [0.45, 0.45], enterrar: 0.1 })),
+    { arq: 'arvore-betula', x: -40, z: -60, rot: 1.1, caixa: [0.5, 0.5], enterrar: 0.2 },
+    { arq: 'arvore-outono-1', x: 50, z: 55, rot: 2.6, caixa: [0.5, 0.5], enterrar: 0.2 },
+    { arq: 'arvore-outono-2', x: -60, z: 30, rot: 4.2, caixa: [0.6, 0.6], enterrar: 0.2 },
+    // animais (parados): cavalos e porcos no pasto, cães, galos e pássaros pela vila
+    { arq: 'cavalo', x: 48, z: 22, rot: 1.0, caixa: [0.4, 0.9] },
+    { arq: 'cavalo-2', x: 53.5, z: 28.5, rot: 2.6, caixa: [0.5, 0.9] },
+    { arq: 'porco', x: 44, z: 30.5, rot: 4.0, caixa: [0.35, 0.5] },
+    { arq: 'porco', x: 45.6, z: 31.6, rot: 3.3, escala: 0.85, caixa: [0.35, 0.5] },
+    { arq: 'porco', x: 57, z: 17, rot: 0.6, caixa: [0.35, 0.5] },
+    { arq: 'cao', x: 6, z: 12, rot: 3.6, caixa: [0.2, 0.3] },
+    { arq: 'cao', x: -12.5, z: -14, rot: 0.7, escala: 0.9, caixa: [0.2, 0.3] },
+    { arq: 'galo', x: 14, z: -14, rot: 2.2, caixa: [0.1, 0.1] },
+    { arq: 'galo', x: 15.3, z: -15.6, rot: 4.9, escala: 0.9, caixa: [0.1, 0.1] },
+    { arq: 'pombo', x: 2, z: -6, rot: 0.3, caixa: [0, 0] },
+    { arq: 'pombo', x: 3.1, z: -5.4, rot: 2.8, caixa: [0, 0] },
+    { arq: 'pombo', x: -4, z: 3, rot: 5.0, caixa: [0, 0] },
+    { arq: 'pardal', x: -3, z: 9, rot: 1.4, caixa: [0, 0] },
+    { arq: 'pardal', x: -2.4, z: 9.5, rot: 3.9, caixa: [0, 0] },
+    { arq: 'gaivota', x: 9.5, z: 4.2, rot: 2.0, caixa: [0, 0] },
+    // terra dos vilões (Teide): o círculo de ritual perto do cume, cercado de cristais
+    { arq: 'circulo-ritual', x: 65, z: -1455, rot: voltadoPara(65, -1455, 0, -600), caixa: [3.1, 3.6], enterrar: 0.8 },
+    ...[[0, 9], [1.3, 10], [2.5, 8.5], [3.7, 9.5], [4.9, 10.5]]
+      .map(([a, r], i) => ({ arq: 'cristal-sol', x: 65 + Math.sin(a) * r, z: -1455 + Math.cos(a) * r, rot: a * 2, escala: 1.2 + (i % 3) * 0.3, caixa: [0.4, 0.4], enterrar: 0.15 })),
   ];
+  // jeito de cada arquivo: os cristais brilham com a própria cor (como brasa)
+  const JEITO_ITENS = { 'cristal-sol': { brilho: 1.6 } };
+
+  // ---------- personagens e bichos animados (objetos/personagens) ----------
+  // Cada um tem o seu AnimationMixer. O diabrete e o porco-goblin usam o mesmo esqueleto do herói e tocam as animações
+  // dele (doHeroi). Quem tem "voo" dá voltas no ar em torno de um ponto.
+  const SUL = { x: 0, z: -600 };   // os vilões ficam virados para o vale
+  const ANIMADOS = [
+    { arq: 'gato', x: -6, z: 15, rot: 2.4, clipe: 'parado', caixa: [0.15, 0.25] },
+    { arq: 'orc', x: 82, z: -1440, rot: voltadoPara(82, -1440, SUL.x, SUL.z), clipe: 'parado1', caixa: [0.5, 0.5] },
+    { arq: 'diabrete', x: 50, z: -1440, rot: voltadoPara(50, -1440, SUL.x, SUL.z), clipe: 'Idle_Loop', doHeroi: true, caixa: [0.4, 0.4] },
+    { arq: 'diabrete', x: 76, z: -1470, rot: 2.2, clipe: 'Sword_Idle', doHeroi: true, caixa: [0.4, 0.4] },
+    { arq: 'puglin', x: 58, z: -1478, rot: 0.9, clipe: 'Idle_Loop', doHeroi: true, caixa: [0.4, 0.4] },
+    { arq: 'puglin', x: 90, z: -1452, rot: 4.0, clipe: 'Idle_Loop', doHeroi: true, caixa: [0.4, 0.4] },
+    { arq: 'guardiao', x: 40, z: -1478, rot: voltadoPara(40, -1478, SUL.x, SUL.z), caixa: [1.4, 1.2] },
+    // pardais dando voltas sobre a vila (altura em metros acima do nível do vale)
+    { arq: 'passaro', x: 0, z: 0, clipe: 'voar', voo: { cx: 0, cz: 0, raio: 35, altura: 16, vel: 0.32 } },
+    { arq: 'passaro', x: 0, z: 0, clipe: 'planar', voo: { cx: 15, cz: -10, raio: 55, altura: 22, vel: -0.2 } },
+    { arq: 'passaro', x: 0, z: 0, clipe: 'voar', voo: { cx: 45, cz: 20, raio: 22, altura: 13, vel: 0.45 } },
+  ];
+  const animados = [];
+  async function carregarAnimados() {
+    const porArquivo = {};
+    for (const a of ANIMADOS) (porArquivo[a.arq] = porArquivo[a.arq] || []).push(a);
+    const tarefas = Object.entries(porArquivo).map(async ([arq, lista]) => {
+      const gltf = await carregarGLB('objetos/personagens/' + arq + '.glb' + SUFIXO_GLB);
+      gltf.scene.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; if (o.material) o.material.envMapIntensity = 0.5; } });
+      const clipesHeroi = lista.some((a) => a.doHeroi) ? await animsDoHeroi : [];
+      lista.forEach((a, i) => {
+        const m = THREE.SkeletonUtils.clone(gltf.scene);
+        m.position.set(a.x, a.voo ? a.voo.altura : alturaMundo(a.x, a.z), a.z);
+        m.rotation.y = a.rot || 0;
+        scene.add(m);
+        if (a.caixa) obstaculo(a.x, a.z, a.caixa[0], a.caixa[1], a.rot || 0);
+        const clipes = a.doHeroi ? clipesHeroi : gltf.animations;
+        const clipe = clipes.find((c) => c.name === a.clipe) || clipes[0];
+        const vivo = { modelo: m, voo: a.voo, angulo: i * 1.9, mixer: null };
+        if (clipe) {
+          vivo.mixer = new THREE.AnimationMixer(m);
+          const acao = vivo.mixer.clipAction(clipe);
+          acao.play();
+          acao.time = (i * 0.37) % clipe.duration;   // as cópias não ficam sincronizadas
+        }
+        animados.push(vivo);
+      });
+    });
+    const fim = await Promise.allSettled(tarefas);
+    for (const r of fim) if (r.status === 'rejected') console.warn('não carregou um personagem:', r.reason);
+    creditosExtras.add('Diabrete e porco-goblin: Quaternius (CC0); orc, guardião infernal, gato e animais: arquivos do Drive');
+  }
+  function animarVivos(dt) {
+    for (const v of animados) {
+      if (v.mixer) v.mixer.update(dt);
+      if (v.voo) {
+        v.angulo += dt * v.voo.vel;
+        const s = Math.sin(v.angulo), c = Math.cos(v.angulo);
+        v.modelo.position.set(v.voo.cx + s * v.voo.raio, v.voo.altura + Math.sin(v.angulo * 2.3) * 2, v.voo.cz + c * v.voo.raio);
+        v.modelo.rotation.y = v.angulo + (v.voo.vel > 0 ? Math.PI / 2 : -Math.PI / 2);   // de frente para onde voa
+      }
+    }
+  }
+  function voltadoPara(x, z, px, pz) { return Math.atan2(px - x, pz - z); }
   const chaosObjetos = [];   // chão por cima de cada escaneado, já posto no mapa
   function alturaComObjetos(x, z) {
-    let h = alturaVila(x, z);
+    let h = alturaMundo(x, z);
     for (const o of chaosObjetos) {
       const dx = x - o.x, dz = z - o.z;
       const ho = o.y + o.chao.altura(dx * o.c - dz * o.s, dx * o.s + dz * o.c);
@@ -363,7 +662,7 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
       const pasta = 'objetos/' + e.id + '/';
       const meta = await lerMeta(pasta + 'objeto.json');
       const [chao, modelo] = await Promise.all([lerChao(pasta, meta), carregarEscaneado(pasta, meta)]);
-      const y = e.y !== undefined ? e.y : alturaVila(e.x, e.z) - (e.enterrar || 0);
+      const y = e.y !== undefined ? e.y : alturaMundo(e.x, e.z) - (e.enterrar || 0);
       modelo.position.set(e.x, y, e.z);
       modelo.rotation.y = e.rot;
       scene.add(modelo);
@@ -374,19 +673,30 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
     for (const it of ITENS_VILA) (porArquivo[it.arq] = porArquivo[it.arq] || []).push(it);
     for (const [arq, lista] of Object.entries(porArquivo)) {
       tarefas.push(carregarGLB('objetos/itens/' + arq + '.glb' + SUFIXO_GLB).then((gltf) => {
-        gltf.scene.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; o.material.envMapIntensity = 0.5; } });
+        const jeito = JEITO_ITENS[arq] || {};
+        gltf.scene.traverse((o) => {
+          if (!o.isMesh) return;
+          o.castShadow = true;
+          o.receiveShadow = true;
+          o.material.envMapIntensity = 0.5;
+          if (jeito.brilho && o.material.map) {
+            o.material.emissiveMap = o.material.map;
+            o.material.emissive.set(0xffffff);
+            o.material.emissiveIntensity = jeito.brilho;
+          }
+        });
         for (const it of lista) {
           const m = gltf.scene.clone();
           const e = it.escala || 1;
-          m.position.set(it.x, alturaVila(it.x, it.z) - (it.enterrar || 0.05), it.z);
+          m.position.set(it.x, alturaMundo(it.x, it.z) - (it.enterrar || 0.05), it.z);
           m.rotation.y = it.rot;
           m.scale.setScalar(e);
           scene.add(m);
-          obstaculo(it.x, it.z, it.caixa[0] * e, it.caixa[1] * e, it.rot);
+          if (it.caixa[0] > 0) obstaculo(it.x, it.z, it.caixa[0] * e, it.caixa[1] * e, it.rot);
         }
       }));
     }
-    tarefas.push(carregarNatureza());
+    tarefas.push(carregarNatureza(), carregarAnimados());
     const fim = await Promise.allSettled(tarefas);
     for (const r of fim) if (r.status === 'rejected') console.warn('não carregou um objeto da vila:', r.reason);
     $('creditos').innerHTML += ' ' + [...creditosExtras].join('. ') + '.';
@@ -399,6 +709,7 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
   // Em bosques em volta da vila, sem encher demais. Cada árvore e pedra fica em RECURSOS, com a peça e o número da
   // cópia dela, para depois o herói poder cortar (madeira) e quebrar (pedra).
   const RECURSOS = [];
+  const COR_VULCAO = new THREE.Color(0.42, 0.37, 0.34), BRANCO = new THREE.Color(1, 1, 1);
   const ARVORES_COMUNS = ['CommonTree_1', 'CommonTree_2', 'CommonTree_3', 'CommonTree_4', 'CommonTree_5'];
   const PINHEIROS = ['Pine_1', 'Pine_2', 'Pine_3', 'Pine_4', 'Pine_5'];
   const PEDRAS = ['Rock_Medium_1', 'Rock_Medium_2', 'Rock_Medium_3'];
@@ -410,9 +721,10 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
     if (Math.abs(x) < 9 || Math.abs(z) < 9) return false;                                   // estradas
     if (x > 34 && x < 66 && z > 8 && z < 40) return false;                                  // pasto
     if (Math.abs(x) < 118 && z < -118) return false;                                         // Pico
-    if (Math.hypot(x - PLATO_PONTE.x, z - PLATO_PONTE.z) < PLATO_PONTE.r1) return false;   // Ponte
+    if (Math.hypot(x - PLATO_PONTE.x, z - PLATO_PONTE.z) < 140) return false;               // Ponte
+    if (z < -380) return false;                                                              // Teide: sem árvores
     for (const o of ESCANEADOS_VILA) if (o.id === 'andrew' && Math.hypot(x - o.x, z - o.z) < 12) return false;
-    for (const it of ITENS_VILA) if (Math.hypot(x - it.x, z - it.z) < 8) return false;
+    for (const it of ITENS_VILA) if (Math.hypot(x - it.x, z - it.z) < Math.max(8, Math.max(...it.caixa) * 1.6 * (it.escala || 1))) return false;
     return true;
   }
   function espalharNatureza() {
@@ -452,6 +764,16 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
       const n = rnd() < 0.4 ? 2 + Math.floor(rnd() * 2) : 1;
       for (let k = 0; k < n; k++) tenta('pedra', PEDRAS, x + (rnd() - 0.5) * 6, z + (rnd() - 0.5) * 6, 3, 0.6, 1.3);
     }
+    // na terra dos vilões (Teide), só pedras: escuras, maiores e espalhadas, algumas em grupos
+    for (let i = 0; i < 90 * fator; i++) {
+      const x = (rnd() - 0.5) * 1700, z = -580 - rnd() * 1850;
+      const n = rnd() < 0.35 ? 2 + Math.floor(rnd() * 3) : 1;
+      for (let k = 0; k < n; k++) {
+        const px = x + (rnd() - 0.5) * 12, pz = z + (rnd() - 0.5) * 12;
+        if (perto(px, pz, 5)) continue;
+        lista.push({ tipo: 'pedra', vulcao: true, peca: PEDRAS[Math.floor(rnd() * PEDRAS.length)], x: px, z: pz, rot: rnd() * Math.PI * 2, esc: 0.8 + rnd() * 2.4 });
+      }
+    }
     return lista;
   }
   async function carregarNatureza() {
@@ -460,34 +782,52 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
     const pecas = {};
     for (const o of gltf.scene.children) pecas[o.name] = o;
     const lista = espalharNatureza();
-    const porPeca = new Map();
+    // As cópias de cada peça são agrupadas em blocos de 400 m. Cada bloco vira uma InstancedMesh com uma esfera que cobre
+    // as cópias dele, então o navegador pula (no desenho e na sombra) os bosques que estão fora da tela.
+    const BLOCO = 400;
+    const grupos = new Map();
     for (const o of lista) {
-      if (!porPeca.has(o.peca)) porPeca.set(o.peca, []);
+      const chave = o.peca + '|' + Math.floor(o.x / BLOCO) + '|' + Math.floor(o.z / BLOCO);
+      if (!grupos.has(chave)) grupos.set(chave, []);
       const afunda = o.tipo === 'pedra' ? 0.35 * o.esc : 0.15;
-      o.y = alturaVila(o.x, o.z) - afunda;
-      o.indice = porPeca.get(o.peca).length;
-      porPeca.get(o.peca).push(o);
+      o.y = alturaMundo(o.x, o.z) - afunda;
+      o.indice = grupos.get(chave).length;   // posição da cópia na InstancedMesh do bloco (para cortar ou quebrar depois)
+      grupos.get(chave).push(o);
       if (o.tipo === 'arvore') obstaculo(o.x, o.z, 0.45 * o.esc, 0.45 * o.esc, o.rot);
       if (o.tipo === 'pedra') obstaculo(o.x, o.z, 1.25 * o.esc, 1.1 * o.esc, o.rot);
       RECURSOS.push(o);
     }
     const m = new THREE.Matrix4(), q = new THREE.Quaternion(), v = new THREE.Vector3(), e = new THREE.Vector3();
-    for (const [nome, copias] of porPeca) {
-      const peca = pecas[nome];
+    for (const [chave, copias] of grupos) {
+      const nome = chave.split('|')[0], peca = pecas[nome];
       if (!peca) { console.warn('peça da natureza não encontrada:', nome); continue; }
       const inv = new THREE.Matrix4().copy(peca.matrixWorld).invert();
+      const temCor = copias.some((k) => k.vulcao);
       const malhas = [];
       peca.traverse((o) => {
         if (!o.isMesh) return;
         const rel = new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld);
-        const im = new THREE.InstancedMesh(o.geometry, o.material, copias.length);
+        // geometria que reaproveita os mesmos dados da peça (não duplica memória), com a esfera do bloco
+        const base = o.geometry;
+        if (!base.boundingSphere) base.computeBoundingSphere();
+        const geo = new THREE.BufferGeometry();
+        geo.setIndex(base.index);
+        for (const [n, a] of Object.entries(base.attributes)) geo.setAttribute(n, a);
+        const centro = new THREE.Vector3();
+        for (const c of copias) centro.add(v.set(c.x, c.y, c.z));
+        centro.divideScalar(copias.length);
+        const r0 = base.boundingSphere.radius + base.boundingSphere.center.length();
+        let raio = 0;
+        for (const c of copias) raio = Math.max(raio, v.set(c.x, c.y, c.z).distanceTo(centro) + r0 * c.esc);
+        geo.boundingSphere = new THREE.Sphere(centro, raio);
+        const im = new THREE.InstancedMesh(geo, o.material, copias.length);
         copias.forEach((c, i) => {
           m.compose(v.set(c.x, c.y, c.z), q.setFromAxisAngle(EIXO_Y, c.rot), e.setScalar(c.esc));
           im.setMatrixAt(i, m.multiply(rel));
+          if (temCor) im.setColorAt(i, c.vulcao ? COR_VULCAO : BRANCO);
         });
         im.castShadow = true;
         im.receiveShadow = true;
-        im.frustumCulled = false;
         o.material.envMapIntensity = 0.5;
         scene.add(im);
         malhas.push(im);
@@ -499,48 +839,13 @@ kbd { display: inline-grid; place-items: center; min-width: 22px; height: 20px; 
 
   async function montarVila() {
     alturaEm = alturaComObjetos;
-    LIMITE = 280;
+    LIMITES = { xmin: -950, xmax: 950, zmin: -2440, zmax: 600 };
     $('creditos').innerHTML = 'Casas e herói: <a href="https://quaternius.com" target="_blank" rel="noopener">Quaternius</a> (CC0). Grama e terra: <a href="https://polyhaven.com" target="_blank" rel="noopener">Poly Haven</a> (CC0).';
-    // chão: grama com manchas de terra e as estradas de terra que saem da vila
-    const [texGrama, texTerra] = await Promise.all([carregarTextura('vila/grama.jpg'), carregarTextura('vila/terra.jpg')]);
-    for (const t of [texGrama, texTerra]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); }
+    // chão do mundo inteiro: o vale da vila e, atrás do Pico, o Teide
+    elCargaTexto.textContent = 'Preparando o chão…';
+    const [, matChao] = await Promise.all([carregarAlturasTeide(), materialChaoMundo()]);
     elCargaBarra.style.width = '20%';
-    const N = LEVE ? 150 : 250, L = 1000;
-    const geo = new THREE.PlaneGeometry(L, L, N, N);
-    geo.rotateX(-Math.PI / 2);
-    const pos = geo.attributes.position;
-    for (let i = 0; i < pos.count; i++) pos.setY(i, alturaVila(pos.getX(i), pos.getZ(i)));
-    geo.computeVertexNormals();
-    const matChao = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95, metalness: 0, envMapIntensity: 0.35 });
-    matChao.onBeforeCompile = (sh) => {
-      sh.uniforms.grama = { value: texGrama };
-      sh.uniforms.terra = { value: texTerra };
-      sh.vertexShader = sh.vertexShader
-        .replace('#include <common>', '#include <common>\nvarying vec2 vMundo;')
-        .replace('#include <begin_vertex>', '#include <begin_vertex>\nvMundo = (modelMatrix * vec4(position, 1.0)).xz;');
-      sh.fragmentShader = sh.fragmentShader
-        .replace('#include <common>', `#include <common>
-varying vec2 vMundo;
-uniform sampler2D grama;
-uniform sampler2D terra;
-vec3 lin(vec3 c) { return pow(c, vec3(2.2)); }`)
-        .replace('#include <map_fragment>', `#include <map_fragment>
-{
-  vec3 g = mix(lin(texture2D(grama, vMundo / 3.2).rgb), lin(texture2D(grama, vMundo / 13.0 + 0.31).rgb), 0.4);
-  g *= vec3(0.6, 0.74, 0.42);
-  vec3 t = lin(texture2D(terra, vMundo / 3.0).rgb);
-  float n = sin(vMundo.x * 0.23 + sin(vMundo.y * 0.17) * 2.0) * sin(vMundo.y * 0.19 + 1.3) * 0.5 + 0.5;
-  float n2 = sin(vMundo.x * 0.61 + 0.7) * sin(vMundo.y * 0.53 - 0.4) * 0.5 + 0.5;
-  float manchas = smoothstep(0.7, 0.95, n * 0.7 + n2 * 0.3) * 0.45;
-  float eixo = min(abs(vMundo.x), abs(vMundo.y));
-  float estrada = smoothstep(4.0, 2.2, eixo) * step(15.0, max(abs(vMundo.x), abs(vMundo.y)));
-  float volta = smoothstep(4.0, 1.0, abs(max(abs(vMundo.x), abs(vMundo.y)) - 15.5));
-  diffuseColor.rgb *= mix(g, t, clamp(max(max(manchas, estrada), volta * 0.8), 0.0, 1.0));
-}`);
-    };
-    const chao = new THREE.Mesh(geo, matChao);
-    chao.receiveShadow = true;
-    scene.add(chao);
+    montarChaoMundo(matChao);
 
     // peças da vila
     elCargaTexto.textContent = 'Carregando a vila…';
@@ -618,117 +923,6 @@ vec3 lin(vec3 c) { return pow(c, vec3(2.2)); }`)
     elCargaBarra.style.width = '75%';
     carregarExtrasVila();   // Pico, Ponte, pedras, torre, portal e árvores aparecem assim que chegam
     return { inicio: { x: 0, z: 8, ang: Math.PI, yaw: Math.PI } };
-  }
-
-  // ================= MAPA 2: TEIDE (versão 1) =================
-  // Mapa de alturas de 512 × 512 (PNG, 16 bits em R e G) com 2 km de lado e a foto de satélite por cima.
-  async function montarTeide() {
-    const ESCALA = 100, LADO = 2000;
-    LIMITE = LADO / 2 - 5;
-    $('creditos').innerHTML = 'Terreno: <a href="https://sketchfab.com/3d-models/el-teide-en-3d-4a961a00043e4d6b912506f9ac895825" target="_blank" rel="noopener">El Teide en 3D</a>, por @x_y_es (CC BY). Herói: Quaternius (CC0).';
-    const meta = await (await fetch('terreno/terreno.json')).json();
-    elCargaBarra.style.width = '15%';
-    const img = await carregarImagem('terreno/altura.png');
-    elCargaBarra.style.width = '40%';
-    const n = meta.n;
-    const c = document.createElement('canvas');
-    c.width = c.height = n;
-    const g = c.getContext('2d');
-    g.drawImage(img, 0, 0);
-    const px = g.getImageData(0, 0, n, n).data;
-    const alturas = new Float32Array(n * n);
-    for (let i = 0; i < alturas.length; i++) alturas[i] = (meta.zmin + (px[i * 4] * 256 + px[i * 4 + 1]) / 65535 * (meta.zmax - meta.zmin)) * ESCALA;
-    alturaEm = (x, z) => {
-      const fx = clamp((x + LADO / 2) / LADO * (n - 1), 0, n - 1.0001);
-      const fz = clamp((z + LADO / 2) / LADO * (n - 1), 0, n - 1.0001);
-      const i = Math.floor(fx), k = Math.floor(fz), tx = fx - i, tz = fz - k;
-      const a = alturas[k * n + i], b = alturas[k * n + i + 1], c2 = alturas[(k + 1) * n + i], d = alturas[(k + 1) * n + i + 1];
-      return (a * (1 - tx) + b * tx) * (1 - tz) + (c2 * (1 - tx) + d * tx) * tz;
-    };
-    const passo = LEVE ? 2 : 1, m = Math.floor((n - 1) / passo) + 1;
-    const pos = new Float32Array(m * m * 3), uv = new Float32Array(m * m * 2);
-    for (let k = 0; k < m; k++) {
-      for (let i = 0; i < m; i++) {
-        const o = k * m + i, gi = i * passo, gk = k * passo;
-        pos[o * 3] = -LADO / 2 + gi / (n - 1) * LADO;
-        pos[o * 3 + 1] = alturas[gk * n + gi];
-        pos[o * 3 + 2] = -LADO / 2 + gk / (n - 1) * LADO;
-        uv[o * 2] = gi / (n - 1);
-        uv[o * 2 + 1] = gk / (n - 1);
-      }
-    }
-    const idx = new Uint32Array((m - 1) * (m - 1) * 6);
-    let p = 0;
-    for (let k = 0; k < m - 1; k++) {
-      for (let i = 0; i < m - 1; i++) {
-        const a = k * m + i, b = a + 1, c2 = a + m, d = c2 + 1;
-        idx[p++] = a; idx[p++] = c2; idx[p++] = b;
-        idx[p++] = b; idx[p++] = c2; idx[p++] = d;
-      }
-    }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
-    geo.setIndex(new THREE.BufferAttribute(idx, 1));
-    geo.computeVertexNormals();
-    const tex = await carregarTextura('terreno/textura.jpg');
-    tex.encoding = THREE.sRGBEncoding;
-    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-    elCargaBarra.style.width = '70%';
-    // de perto: pedra recortada da foto da Ponte natural, a cada 4 m e misturada com ela mesma girada a cada 13 m
-    // (para não se ver a repetição). A cor é projetada pelos três lados, para não esticar nas encostas; o relevo fino
-    // da mesma pedra entra na luz, e os dois somem com a distância. A cor do chão continua vindo da foto do Teide.
-    const [texPedra, texRelevo] = await Promise.all([carregarTextura('terreno/pedra.jpg'), carregarTextura('terreno/pedra_normal.jpg')]);
-    for (const t of [texPedra, texRelevo]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); }
-    const matTerreno = new THREE.MeshStandardMaterial({ map: tex, normalMap: texRelevo, normalScale: new THREE.Vector2(1.3, 1.3), roughness: 0.95, metalness: 0.0, envMapIntensity: 0.4 });
-    matTerreno.onBeforeCompile = (sh) => {
-      sh.uniforms.pedra = { value: texPedra };
-      sh.fragmentShader = sh.fragmentShader
-        .replace('#include <map_pars_fragment>', `#include <map_pars_fragment>
-uniform sampler2D pedra;
-varying vec3 vMundo;
-varying vec3 vNormalMundo;
-const mat2 GIRO = mat2(0.8, -0.6, 0.6, 0.8);
-vec3 pedraLinear(vec2 uv) { return pow(texture2D(pedra, uv).rgb, vec3(2.2)); }
-vec3 grao(vec2 p) { return mix(pedraLinear(p / 4.0), pedraLinear(GIRO * p / 13.0 + 0.37), 0.4); }`)
-        .replace('#include <map_fragment>', `#include <map_fragment>
-{
-  const vec3 media = vec3(0.5431, 0.5054, 0.4961);
-  vec3 w = pow(abs(normalize(vNormalMundo)), vec3(4.0));
-  w /= w.x + w.y + w.z;
-  vec3 g = grao(vMundo.zy) * w.x + grao(vMundo.xz) * w.y + grao(vMundo.xy) * w.z;
-  // vale mais o claro e escuro da pedra do que a cor dela (a foto tem reflexos azulados do céu)
-  vec3 r = g / media;
-  vec3 razao = clamp(mix(vec3(dot(r, vec3(0.3, 0.55, 0.15))), r, 0.25), 0.3, 2.2);
-  float dist = length(vViewPosition);
-  float perto = smoothstep(350.0, 25.0, dist);
-  // uma camada larga da mesma pedra (a cada 37 m), que ainda aparece de longe e tira o borrado da foto do Teide
-  float larga = dot(pedraLinear(mat2(0.6, 0.8, -0.8, 0.6) * vMundo.xz / 37.0 + 0.11) / media, vec3(0.3, 0.55, 0.15));
-  float longe = smoothstep(1400.0, 60.0, dist);
-  diffuseColor.rgb *= mix(vec3(1.0), razao, 0.8 * perto) * mix(1.0, clamp(larga, 0.5, 1.6), 0.35 * longe);
-}`)
-        .replace('#include <normal_fragment_maps>', `
-{
-  // relevo da pedra nas mesmas posições da cor (o eixo da textura do terreno anda junto com x e z)
-  float pertoN = smoothstep(350.0, 25.0, length(vViewPosition));
-  vec3 mapN = texture2D(normalMap, vMundo.xz / 4.0).xyz * 2.0 - 1.0;
-  vec3 mapN2 = texture2D(normalMap, GIRO * vMundo.xz / 13.0 + 0.37).xyz * 2.0 - 1.0;
-  mapN2.xy = mat2(0.8, 0.6, -0.6, 0.8) * mapN2.xy;
-  mapN = normalize(vec3(mapN.xy + mapN2.xy * 0.6, mapN.z));
-  mapN.xy *= normalScale * pertoN;
-  normal = perturbNormal2Arb(- vViewPosition, normal, mapN, faceDirection);
-}`);
-      sh.vertexShader = sh.vertexShader
-        .replace('#include <common>', '#include <common>\nvarying vec3 vMundo;\nvarying vec3 vNormalMundo;')
-        .replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvMundo = (modelMatrix * vec4(transformed, 1.0)).xyz;\nvNormalMundo = mat3(modelMatrix) * objectNormal;');
-    };
-    const terreno = new THREE.Mesh(geo, matTerreno);
-    terreno.receiveShadow = true;
-    scene.add(terreno);
-    const borda = new THREE.Mesh(new THREE.BoxGeometry(LADO, 1, LADO), new THREE.MeshStandardMaterial({ color: 0x4a3f33, roughness: 1 }));
-    borda.position.y = meta.zmin * ESCALA - 40;
-    scene.add(borda);
-    return { inicio: { x: 410, z: 410, ang: Math.PI, yaw: Math.PI } };
   }
 
   // ================= TERRENOS ESCANEADOS (fotogrametria) =================
@@ -843,7 +1037,7 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
     alturaEm = chaoEsc.alturaBruta;
     livreEm = chaoEsc.livreEm;
     const L = meta.lado;
-    LIMITE = L / 2;
+    LIMITES = { xmin: -L / 2, xmax: L / 2, zmin: -L / 2, zmax: L / 2 };
     ZOOM_MAX = clamp(L * 0.35, 90, 400);
     elCargaBarra.style.width = '10%';
     scene.add(await carregarEscaneado(pasta, meta, (xhr) => { if (xhr.total) elCargaBarra.style.width = (10 + 60 * xhr.loaded / xhr.total) + '%'; }));
@@ -862,6 +1056,9 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
   // ---------- herói animado ----------
   const heroi = { pos: new THREE.Vector3(), ang: 0, vel: 0, grupo: new THREE.Group(), mixer: null, acoes: {}, atual: null, golpe: 0, guarda: 0 };
   scene.add(heroi.grupo);
+  // as animações do herói também servem para os personagens que usam o mesmo esqueleto
+  let avisarAnimsHeroi;
+  const animsDoHeroi = new Promise((ok) => { avisarAnimsHeroi = ok; });
   async function carregarHeroi() {
     const parte = { heroi: 0, anims: 0 };
     const progresso = (qual) => (xhr) => { if (xhr.total) { parte[qual] = xhr.loaded / xhr.total; elCargaBarra.style.width = (75 + 20 * parte.heroi + 5 * parte.anims) + '%'; } };
@@ -872,6 +1069,7 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
     heroi.grupo.add(m);
     heroi.mixer = new THREE.AnimationMixer(m);
     for (const clip of anims.animations) heroi.acoes[clip.name] = heroi.mixer.clipAction(clip);
+    avisarAnimsHeroi(anims.animations);
     const faltam = Object.values(ANIM).filter((n) => !heroi.acoes[n]);
     if (faltam.length) throw new Error('animações faltando: ' + faltam.join(', '));
     const golpe = heroi.acoes[ANIM.golpe];
@@ -988,8 +1186,8 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
       // subida íngreme segura o passo
       const sobe = alturaEm(nx, nz) - heroi.pos.y;
       const fator = sobe > 0 ? clamp(1 - sobe / (heroi.vel * dt) * 0.7, 0.25, 1) : 1;
-      heroi.pos.x = clamp(heroi.pos.x + (nx - heroi.pos.x) * fator, -LIMITE, LIMITE);
-      heroi.pos.z = clamp(heroi.pos.z + (nz - heroi.pos.z) * fator, -LIMITE, LIMITE);
+      heroi.pos.x = clamp(heroi.pos.x + (nx - heroi.pos.x) * fator, LIMITES.xmin, LIMITES.xmax);
+      heroi.pos.z = clamp(heroi.pos.z + (nz - heroi.pos.z) * fator, LIMITES.zmin, LIMITES.zmax);
       resolverColisao(heroi.pos, 0.45);
     }
     heroi.pos.y = alturaEm(heroi.pos.x, heroi.pos.z);
@@ -1011,23 +1209,45 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
       if (heroi.atual) heroi.atual.timeScale = 1;
     }
     if (heroi.mixer) heroi.mixer.update(dt);
+    animarVivos(dt);
   }
 
   // ---------- laço ----------
   const elInfo = $('info');
-  let ultimo = 0, quadros = 0, tFps = 0, fps = 0;
+  let ultimo = 0, quadros = 0, tFps = 0, fps = 0, tAjuste = 0, quadrosAjuste = 0, lentos = 0;
   function quadro(agora) {
     requestAnimationFrame(quadro);
-    const dt = Math.min(0.05, Math.max(0, (agora - ultimo) / 1000));
+    const real = Math.max(0, (agora - ultimo) / 1000);
+    const dt = Math.min(0.05, real);
     ultimo = agora;
     moverHeroi(dt);
     atualizarCamera(dt);
-    quadros++; tFps += dt;
+    quadros++; tFps += real;
     if (tFps >= 0.5) {
       fps = Math.round(quadros / tFps); quadros = 0; tFps = 0;
       elInfo.textContent = MAPA_INFO.nome + ` · posição ${Math.round(heroi.pos.x)}, ${Math.round(heroi.pos.z)} · ${fps} fps`;
     }
+    ajustarResolucao(real);
     renderer.render(scene, camera);
+  }
+  // A cada 2 s: abaixo de 45 FPS a resolução desce um pouco; acima de 58 sobe. No automático, se mesmo na resolução
+  // mínima ficar abaixo de 24 FPS por 3 vezes seguidas, as sombras são desligadas.
+  function ajustarResolucao(real) {
+    if (real > 0.5) return;   // aba escondida ou travada: não conta
+    tAjuste += real; quadrosAjuste++;
+    if (tAjuste < 2) return;
+    const media = quadrosAjuste / tAjuste;
+    tAjuste = 0; quadrosAjuste = 0;
+    const antes = RESOLUCAO.atual;
+    if (media < 45) RESOLUCAO.atual = Math.max(RESOLUCAO.min, RESOLUCAO.atual - 0.1);
+    else if (media > 58) RESOLUCAO.atual = Math.min(RESOLUCAO.max, RESOLUCAO.atual + 0.05);
+    if (RESOLUCAO.atual !== antes) { renderer.setPixelRatio(RESOLUCAO.atual); redimensionar(); }
+    lentos = media < 24 && RESOLUCAO.atual <= RESOLUCAO.min ? lentos + 1 : 0;
+    if (lentos >= 3 && QUALIDADE === 'auto' && renderer.shadowMap.enabled) {
+      renderer.shadowMap.enabled = false;
+      sol.castShadow = false;
+      scene.traverse((o) => { if (o.material) for (const m of [].concat(o.material)) m.needsUpdate = true; });
+    }
   }
   function redimensionar() {
     const w = canvas.clientWidth || window.innerWidth, h = canvas.clientHeight || window.innerHeight;
@@ -1041,7 +1261,7 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
     let mapa;
     try {
       elCargaTexto.textContent = 'Carregando ' + MAPA_INFO.nome + '…';
-      mapa = MAPA === 'vila' ? await montarVila() : MAPA === 'teide' ? await montarTeide() : await montarEscaneado();
+      mapa = MAPA === 'vila' ? await montarVila() : await montarEscaneado();
       elCargaTexto.textContent = 'Carregando o herói…';
       await carregarHeroi();
     } catch (e) {
@@ -1061,7 +1281,13 @@ vec3 grao(vec2 p) { return mix(detalheLinear(p / 3.0), detalheLinear(mat2(0.8, -
     ultimo = performance.now();
     requestAnimationFrame(quadro);
   })();
-  window.__reino = { heroi, cam, get alturaEm() { return alturaEm; }, obstaculos, MAPA, RECURSOS, get extrasProntos() { return extrasProntos; } };
+  window.__reino = { heroi, cam, get alturaEm() { return alturaEm; }, obstaculos, MAPA, RECURSOS, get extrasProntos() { return extrasProntos; }, renderer, RESOLUCAO };
+
+  // No GitHub Pages o jogo pode ser instalado no PC pelo Chrome (botão "Instalar" na barra de endereço) e abre sem
+  // internet depois da primeira vez. Dentro do link de teste do Claude (que roda num quadro) isso não se aplica.
+  if ('serviceWorker' in navigator && window.top === window && /^https?:$/.test(location.protocol)) {
+    navigator.serviceWorker.register('sw.js').catch(() => { /* sem instalação: o jogo funciona igual */ });
+  }
 })();
 </script>
 </body>

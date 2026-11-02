@@ -20,6 +20,10 @@
   (terrenos escaneados e itens postos na vila), `terreno/` (o Teide), `ferramentas/` (conversores com o Blender como
   módulo do Python).
 - A história do jogo está em `HISTORIA.md` (duas propostas; a recomendada é "Cavaleiro do Teide").
+- O mundo é um mapa só: a vila no vale ao sul e o Teide (terra dos vilões, sem verde) ao norte, atrás do Pico.
+  Itens parados ficam em `ITENS_VILA`, personagens e bichos animados em `ANIMADOS`.
+- Desempenho: botão "Gráficos" (automático, leve, alto), resolução que se ajusta ao FPS e aviso quando o Chrome está
+  sem aceleração gráfica. O jogo pode ser instalado pelo Chrome (`manifest.webmanifest` e `sw.js`).
 - `TURBO = 10` no `index.html` é temporário (herói 10x mais rápido para conferir os mapas).
 - No link de teste do Claude (Artifact), arquivos `.glb` não são servidos: a cópia para lá troca `SUFIXO_GLB` por
   `'.txt'` e grava os `.glb` em base64 (em partes, se passarem de 15 milhões de caracteres).

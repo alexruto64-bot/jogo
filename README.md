@@ -9,26 +9,27 @@ A história (duas propostas, com a recomendada e a comparação) está em [HISTO
 
 > **Temporário:** o herói está 10x mais rápido para conferir os mapas (`TURBO = 10` no `index.html`). Voltar para 1 depois.
 
-## Mapas
+## O mundo
 
-- **Vila medieval** (padrão): praça de pedra, ruas calçadas, 12 casas montadas peça por peça (paredes de pedra e
-  enxaimel, janelas, portas, varandas, telhados de telha e uma torre), carroça, caixotes e um pasto cercado, num vale
-  cercado de morros. Em volta:
+Um mapa só, de 2 × 3 km:
+
+- **O vale da vila** (ao sul): praça de pedra, ruas calçadas, 12 casas montadas peça por peça (paredes de pedra e
+  enxaimel, janelas, portas, varandas, telhados de telha e uma torre), carroça, caixotes e um pasto cercado, cercado de
+  morros. Em volta:
   - ao norte, o **Pico rochoso**: paredão de pedra real (escaneado) com mais de 230 m acima do vale, apoiado num morro;
-  - a leste, a **Ponte natural**: arco de pedra real (escaneado), com uns 60 m, num platô;
+  - a leste, a **Ponte natural**: arco de pedra real (escaneado), com uns 240 m de comprimento e 70 m de altura;
   - perto da estrada norte, um afloramento de **pedras reais** (escaneadas em Mt Andrew, Austrália);
   - uma **torre de vigia** de pedra na entrada oeste, um **portal gótico** no fim da estrada norte e **árvores secas**;
   - **bosques** de árvores comuns e pinheiros (pinheiros nos morros mais altos), árvores soltas, duas árvores
     retorcidas grandes e pedras soltas. Cada árvore e pedra fica registrada em `RECURSOS`, para virar madeira e pedra.
+- **O Teide** (ao norte, atrás do Pico): o terreno real do vulcão, com 2 km de lado, é a terra dos vilões: sem árvores e
+  sem verde, só pedras escuras espalhadas. O chão passa do vale para o Teide entre z = −430 e −600. No Teide, a foto de
+  satélite dá as cores de longe e três fotos de chão do Poly Haven dão o detalhe de perto (`terreno/cascalho.jpg`,
+  `terreno/cinza.jpg` onde a foto é avermelhada e `terreno/entulho.jpg` nas encostas), cada uma com o relevo fino dela.
 
-  O herói não atravessa casas, árvores, pedras e itens, sobe nas pedras e no arco onde a inclinação deixa e não escala
-  paredões. A vila abre primeiro e o resto vai aparecendo assim que chega.
-- **Teide (versão 1)**: o terreno real do Teide, com 2 km de lado. De perto, o chão ganha a pedra da Ponte natural:
-  um trecho da foto dela virou uma textura que repete sem emenda (`terreno/pedra.jpg`), com relevo fino para a luz
-  (`terreno/pedra_normal.jpg`).
-
-Troque de mapa pelas setas ◀ ▶ ou pela lista no topo; só o mapa escolhido é carregado. O Teide também abre com
-`#teide` no fim do endereço.
+O chão é desenhado em blocos de 250 m e as árvores e pedras em blocos de 400 m, para o navegador pular o que está fora
+da tela. O herói não atravessa casas, árvores, pedras e itens, sobe nas pedras e no arco onde a inclinação deixa e não
+escala paredões. A vila abre primeiro e o resto vai aparecendo assim que chega.
 
 Terrenos avaliados e que ficaram de fora (sem detalhe de perto ou que não agradaram): Represa de Negratín, Monte da
 Tentação, Columbia River Gorge, Encosta na floresta, o levantamento de 6 km com foto de satélite e a Gruta do Fogão
@@ -47,7 +48,20 @@ Tentação, Columbia River Gorge, Encosta na floresta, o levantamento de 6 km co
 | Clicar e arrastar           | Girar e inclinar a câmera                        |
 | Q E / Z X                   | Girar / aproximar pelo teclado                   |
 
-Abrir a página com `?leve=1` reduz a malha do chão e as sombras, para máquinas fracas.
+## Desempenho e instalação
+
+- **Gráficos** (botão no topo, fica guardado no navegador):
+  - *automático* (padrão): a resolução sobe ou desce sozinha conforme o FPS e, se mesmo assim ficar muito lento, as
+    sombras são desligadas;
+  - *leve*: chão mais simples, metade das árvores, sem sombras e resolução baixa;
+  - *alto*: resolução e sombras no máximo.
+
+  Abrir a página com `?leve=1` também liga o modo leve.
+- Se o Chrome estiver sem aceleração gráfica (desenhando o 3D pelo processador), aparece um aviso explicando como
+  ligar: Configurações do Chrome → Sistema → "Usar aceleração gráfica quando disponível".
+- **Instalar no PC:** no GitHub Pages, o Chrome mostra o botão "Instalar" na barra de endereço (`manifest.webmanifest`
+  e `sw.js`). O jogo ganha um ícone, abre em janela própria e funciona sem internet depois da primeira vez. Ele roda
+  no mesmo motor do Chrome, então a velocidade é a mesma; o que pesa é a placa de vídeo e a qualidade escolhida.
 
 ## O herói
 
@@ -90,9 +104,21 @@ mapa na lista `MAPAS` do `index.html`.
 
 ## Itens
 
-`objetos/itens/` tem a torre de vigia, o portal e a árvore seca, com o tamanho em metros e texturas de 2048 px
-(convertidos com `ferramentas/preparar_item.py`). As árvores e pedras dos bosques vêm de `vila/natureza.glb`
-(15 peças do *Stylized Nature MegaKit*) e são desenhadas com `InstancedMesh`.
+`objetos/itens/` tem os modelos parados enviados ao Drive, já no tamanho em metros (lista `ITENS_VILA` no `index.html`):
+
+- **Construções:** torre de vigia, portal gótico, Torre da Luz, castelo na rocha, casa-torre, moinho e uma escada de
+  pedra na encosta do Pico.
+- **História do cristal:** cristais de pedra-sol (brilham sozinhos) na trilha do arco até o portal e em volta do
+  círculo ritual dos vilões, no Teide.
+- **Árvores:** árvore seca, árvores comuns, bétula e duas árvores de outono.
+- **Animais:** cavalos e porcos no pasto, cães, galos, pombos, pardais e uma gaivota.
+
+`objetos/personagens/` tem os que se mexem (lista `ANIMADOS`): um gato na praça, pardais voando sobre a vila e, no
+acampamento dos vilões no Teide, um orc, dois diabretes, dois porcos-goblin e o guardião infernal (parado). O diabrete e
+o porco-goblin usam o mesmo esqueleto do herói e tocam as animações dele.
+
+As árvores e pedras dos bosques vêm de `vila/natureza.glb` (15 peças do *Stylized Nature MegaKit*) e são desenhadas
+com `InstancedMesh`.
 
 ## Como a vila é montada
 

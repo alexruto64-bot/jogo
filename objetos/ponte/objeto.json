@@ -1,18 +1,18 @@
 {
  "nome": "Ponte natural",
  "n": 512,
- "lado": 61.2,
- "ladoX": 60.0,
- "ladoZ": 32.85,
- "ymin": 0.0337,
- "ymax": 17.8693,
+ "lado": 244.8,
+ "ladoX": 240.0,
+ "ladoZ": 131.39,
+ "ymin": 0.1455,
+ "ymax": 71.4774,
  "modo": "topo",
  "cor": [
   0.435,
   0.445,
   0.459
  ],
- "triangulos": 299712,
+ "triangulos": 299917,
  "texturas": {
   "chao0": "foto0.webp",
   "chao1": "foto0.webp"
