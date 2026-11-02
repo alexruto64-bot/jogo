@@ -1,0 +1,20 @@
+{
+ "nome": "Pedras de Mt Andrew",
+ "n": 512,
+ "lado": 8.971,
+ "ladoX": 8.0,
+ "ladoZ": 8.53,
+ "ymin": 0.0002,
+ "ymax": 0.7705,
+ "modo": "topo",
+ "cor": [
+  0.565,
+  0.547,
+  0.532
+ ],
+ "triangulos": 133825,
+ "texturas": {
+  "chao0": "foto0.webp"
+ },
+ "credito": "Pedras: afloramento em Mt Andrew, Austrália (Sketchfab)"
+}

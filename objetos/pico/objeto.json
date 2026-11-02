@@ -1,0 +1,20 @@
+{
+ "nome": "Pico rochoso",
+ "n": 512,
+ "lado": 216.927,
+ "ladoX": 212.67,
+ "ladoZ": 211.78,
+ "ymin": 1.3872,
+ "ymax": 262.6916,
+ "modo": "topo",
+ "cor": [
+  0.366,
+  0.374,
+  0.33
+ ],
+ "triangulos": 299856,
+ "texturas": {
+  "chao0": "foto0.webp"
+ },
+ "credito": "Pico rochoso: escaneamento por drone (Sketchfab)"
+}

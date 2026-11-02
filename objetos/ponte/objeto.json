@@ -1,0 +1,21 @@
+{
+ "nome": "Ponte natural",
+ "n": 512,
+ "lado": 61.2,
+ "ladoX": 60.0,
+ "ladoZ": 32.85,
+ "ymin": 0.0337,
+ "ymax": 17.8693,
+ "modo": "topo",
+ "cor": [
+  0.435,
+  0.445,
+  0.459
+ ],
+ "triangulos": 299712,
+ "texturas": {
+  "chao0": "foto0.webp",
+  "chao1": "foto0.webp"
+ },
+ "credito": "Ponte natural: escaneamento (Sketchfab)"
+}

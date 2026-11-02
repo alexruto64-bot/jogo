@@ -1,0 +1,23 @@
+# Instruções para o Claude
+
+## Idioma
+
+- Fale sempre em **português do Brasil**. Nunca responda em inglês.
+- Isso vale para tudo que o usuário lê: respostas, avisos de andamento ("estou fazendo tal coisa"), perguntas,
+  resumos, mensagens de commit, comentários no código e textos do jogo.
+- Mesmo que um arquivo, ferramenta ou erro venha em inglês, explique em português.
+- Nomes técnicos que não têm tradução (Three.js, GitHub Pages, GLB) podem ficar como estão.
+
+## O projeto
+
+- Jogo 3D para o navegador, feito com Three.js r147 (carregado do jsDelivr), sem etapa de build: o jogo inteiro está
+  no `index.html`. Para testar, sirva a pasta por um servidor local (por exemplo `python3 -m http.server`) e abra no
+  Chrome.
+- O dono quer visual o mais realista possível e joga no PC (teclado e touchpad).
+- Pastas: `modelos/` (herói e animações), `vila/` (peças da vila, árvores e pedras, grama e terra), `objetos/`
+  (terrenos escaneados e itens postos na vila), `terreno/` (o Teide), `ferramentas/` (conversores com o Blender como
+  módulo do Python).
+- A história do jogo está em `HISTORIA.md` (duas propostas; a recomendada é "Cavaleiro do Teide").
+- `TURBO = 10` no `index.html` é temporário (herói 10x mais rápido para conferir os mapas).
+- No link de teste do Claude (Artifact), arquivos `.glb` não são servidos: a cópia para lá troca `SUFIXO_GLB` por
+  `'.txt'` e grava os `.glb` em base64 (em partes, se passarem de 15 milhões de caracteres).
