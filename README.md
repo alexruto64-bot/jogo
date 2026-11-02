@@ -1,6 +1,8 @@
 # Cavaleiro do Teide
 
 Jogo de ação para o navegador, em 3D, com visão de cima: um cavaleiro defende território.
+
+**Jogar:** https://alexruto64-bot.github.io/jogo/ (GitHub Pages, publicado a partir da `main`).
 Por enquanto é a base: o herói animado andando pelo mapa, sem inimigos.
 
 A história (duas propostas, com a recomendada e a comparação) está em [HISTORIA.md](HISTORIA.md).

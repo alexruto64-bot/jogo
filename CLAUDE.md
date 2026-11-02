@@ -10,6 +10,8 @@
 
 ## O projeto
 
+- O jogo está publicado no GitHub Pages a partir da `main`: https://alexruto64-bot.github.io/jogo/ (cada envio para a
+  `main` atualiza o link em 1 ou 2 minutos).
 - Jogo 3D para o navegador, feito com Three.js r147 (carregado do jsDelivr), sem etapa de build: o jogo inteiro está
   no `index.html`. Para testar, sirva a pasta por um servidor local (por exemplo `python3 -m http.server`) e abra no
   Chrome.
